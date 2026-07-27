@@ -1,0 +1,29 @@
+{
+  "name": "momentum",
+  "version": "1.0.0",
+  "description": "A premium, glassmorphic task manager with priorities, categories, a calendar view, a pomodoro timer, daily goals, and achievements — built with vanilla HTML, CSS, and JavaScript (ES modules), no framework and no build step.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "npx serve . -l 5173",
+    "dev": "npx serve . -l 5173"
+  },
+  "keywords": [
+    "todo",
+    "task-manager",
+    "productivity",
+    "javascript",
+    "glassmorphism",
+    "vanilla-js",
+    "pomodoro"
+  ],
+  "author": "Neel",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/<your-username>/momentum.git"
+  },
+  "engines": {
+    "node": ">=14"
+  }
+}
