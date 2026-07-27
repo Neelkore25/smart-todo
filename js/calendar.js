@@ -29,7 +29,7 @@ function fillDays(y, m, selectedDay){
     .map(d => `<option value="${d}" ${d === day ? 'selected' : ''}>${d}</option>`).join('');
 }
 
-export function renderCalendar(){ /* no-op: kept so tasks.js's existing import/call stays valid */ }
+
 
 export function initCalendar(onChange){
   const toggleBtn = $('#datePickerToggle');

@@ -20,6 +20,8 @@
   backdrop-filter: blur(40px) saturate(180%);
   -webkit-backdrop-filter: blur(40px) saturate(180%);
   background: linear-gradient(180deg, var(--glass-strong), var(--glass) 140%);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-md);
 }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
   .glass{ background: var(--surface); }

@@ -3,11 +3,11 @@
    inline editing, and manual drag-and-drop reordering.
    ============================================================ */
 import { $, $$ } from './dom.js';
-import { state, uid, persistTasks, persistCounter } from './state.js';
+import { state, uid, persistTasks, persistCounter, nextOrder } from './state.js';
 import { paintIcons } from './icons.js';
 import { toast } from './toast.js';
 import { renderStats, isOverdue } from './stats.js';
-import { renderCalendar } from './calendar.js';
+
 
 const taskListEl = $('#taskList');
 const emptyStateEl = $('#emptyState');
@@ -98,7 +98,7 @@ export function renderList(){
   paintIcons();
   bindDragAndDrop();
   renderStats();
-  renderCalendar();
+ 
 }
 
 /* ---------- Actions ---------- */
@@ -113,7 +113,7 @@ export function addTask(data){
     recurring: data.recurring || 'none',
     done: false, doneAt: null,
     createdAt: Date.now(),
-    order: state.tasks.length ? Math.max(...state.tasks.map(x => x.order)) + 1 : 0
+   order: nextOrder()
   };
   state.tasks.push(t);
   persistTasks();
@@ -137,7 +137,7 @@ export function toggleDone(id){
       state.tasks.push({
         ...t, id: uid(), done: false, doneAt: null,
         due: base.toISOString().slice(0, 10),
-        createdAt: Date.now(), order: Math.max(...state.tasks.map(x => x.order)) + 1
+        createdAt: Date.now(), order: nextOrder()
       });
       toast(`Next "${t.text}" scheduled for ${base.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`, { icon: 'repeat' });
     }
@@ -159,7 +159,8 @@ function deleteTaskConfirmed(id){
   const removed = state.tasks[idx];
   const li = taskListEl.querySelector(`[data-id="${id}"]`);
   if (li) li.classList.add('leaving');
-  setTimeout(() => {
+
+  const timerId = setTimeout(() => {
     state.tasks = state.tasks.filter(x => x.id !== id);
     persistTasks();
     renderList();
@@ -169,6 +170,7 @@ function deleteTaskConfirmed(id){
     icon: 'trash-2',
     actionLabel: 'Undo',
     onAction: () => {
+      clearTimeout(timerId);
       state.tasks.splice(idx, 0, removed);
       persistTasks();
       renderList();
@@ -193,7 +195,7 @@ taskListEl.addEventListener('click', (e) => {
     if (notesEl) notesEl.classList.toggle('open');
   }
 
-  else if (action === 'delete'){
+ else if (action === 'delete'){
     const actionsEl = li.querySelector('[data-role="actions"]');
     actionsEl.innerHTML = `
       <div class="confirm-delete">
@@ -372,7 +374,7 @@ export function initExportImport(){
           category: t.category || 'Other', due: t.due || '', recurring: t.recurring || 'none',
           done: !!t.done, doneAt: t.doneAt || null,
           createdAt: t.createdAt || Date.now(),
-          order: state.tasks.length ? Math.max(...state.tasks.map(x => x.order)) + 1 : 0
+          order: nextOrder()
         }));
         state.tasks = state.tasks.concat(imported);
         persistTasks();

@@ -124,8 +124,14 @@ select:focus-visible{ border-color: var(--accent); }
   box-shadow: var(--shadow-md);
   border-color: var(--border-strong);
 }
-.task-card.dragging{ opacity: .35; }
-.task-list.drag-active .task-card{ transition: none; }
+.task-card.dragging{
+  opacity: .97;
+  transform: scale(1.02);
+  box-shadow: var(--shadow-lg);
+  cursor: grabbing;
+}
+.task-list.drag-active .task-card{ transition: transform var(--dur-fast) var(--ease); }
+.task-list.drag-active .task-card.dragging{ transition: none; }
 .task-list.drag-active .task-card:hover{ transform: none; box-shadow: none; border-color: var(--border); }
 .task-card.priority-high{ border-left-color: var(--priority-high); }
 .task-card.priority-med{ border-left-color: var(--priority-med); }
