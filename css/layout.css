@@ -23,7 +23,6 @@
   background: linear-gradient(180deg, var(--glass-strong), var(--glass) 140%);
   border: 1px solid var(--border-strong);
   box-shadow: var(--shadow-md);
-<<<<<<< HEAD
   position: relative;
 }
 /* Glossy top highlight — a thin light seam along the upper edge, the kind
@@ -37,8 +36,6 @@
   background: linear-gradient(90deg, transparent, rgba(255,255,255,.55) 50%, transparent);
   border-radius: var(--r-lg) var(--r-lg) 0 0;
   pointer-events: none;
-=======
->>>>>>> 8a14177b9ef9a2281542e3eb482fc5e93a31c87f
 }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
   .glass{ background: var(--surface); }

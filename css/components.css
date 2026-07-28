@@ -130,7 +130,6 @@ select:focus-visible{ border-color: var(--accent); }
   border-color: var(--border-strong);
 }
 .task-card.dragging{
-<<<<<<< HEAD
   /* Fully opaque — background, border, shadow, icons, badges and text are
      all untouched. The only change is a subtle lift so it reads as "picked
      up" without ever looking washed out or transparent, in either theme. */
@@ -145,15 +144,6 @@ select:focus-visible{ border-color: var(--accent); }
 }
 .task-list.drag-active .task-card{ transition: transform var(--dur-fast) var(--ease); }
 .task-list.drag-active .task-card.dragging{ transition: box-shadow var(--dur-fast) ease; }
-=======
-  opacity: .97;
-  transform: scale(1.02);
-  box-shadow: var(--shadow-lg);
-  cursor: grabbing;
-}
-.task-list.drag-active .task-card{ transition: transform var(--dur-fast) var(--ease); }
-.task-list.drag-active .task-card.dragging{ transition: none; }
->>>>>>> 8a14177b9ef9a2281542e3eb482fc5e93a31c87f
 .task-list.drag-active .task-card:hover{ transform: none; box-shadow: none; border-color: var(--border); }
 .task-card.priority-high{ border-left-color: var(--priority-high); }
 .task-card.priority-med{ border-left-color: var(--priority-med); }

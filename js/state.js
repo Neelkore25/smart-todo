@@ -38,6 +38,9 @@ export const state = {
   lastAction: null, // { type, id, ... }
 };
 
-export function persistTasks(){ safeStorage.set('momentum.tasks', state.tasks); }
-export function persistCounter(){ safeStorage.set('momentum.completedCounter', state.completedCounter); }
-export function persistGoal(){ safeStorage.set('momentum.dailyGoal', state.dailyGoal); }
+export function persistTasks(){ safeStorage.set('smarttodo.tasks', state.tasks); }
+export function persistCounter(){ safeStorage.set('smarttodo.completedCounter', state.completedCounter); }
+export function persistGoal(){ safeStorage.set('smarttodo.dailyGoal', state.dailyGoal); }
+export function nextOrder(){
+  return state.tasks.length ? Math.max(...state.tasks.map(x => x.order)) + 1 : 0;
+}
