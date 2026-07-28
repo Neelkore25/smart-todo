@@ -1,7 +1,7 @@
 {
-  "name": "momentum",
+  "name": "smart-todo",
   "version": "1.0.0",
-  "description": "A premium, glassmorphic task manager with priorities, categories, a calendar view, a pomodoro timer, daily goals, and achievements — built with vanilla HTML, CSS, and JavaScript (ES modules), no framework and no build step.",
+  "description": "A premium, glassmorphic task manager with priorities, categories, a calendar view, a Pomodoro timer, daily goals, and achievements — built with vanilla HTML, CSS, and JavaScript (ES modules), with no framework and no build step.",
   "private": true,
   "type": "module",
   "scripts": {
@@ -12,6 +12,8 @@
     "todo",
     "task-manager",
     "productivity",
+    "html",
+    "css",
     "javascript",
     "glassmorphism",
     "vanilla-js",
@@ -21,9 +23,9 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/<your-username>/momentum.git"
+    "url": "https://github.com/<your-username>/smart-todo.git"
   },
   "engines": {
-    "node": ">=14"
+    "node": ">=18"
   }
 }

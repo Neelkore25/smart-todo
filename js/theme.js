@@ -41,8 +41,8 @@ function apply(mode) {
   }
 }
 
-export function initTheme() {
-  let mode = safeStorage.get('smarttodo.theme', 'auto');
+export function initTheme(){
+  let mode = safeStorage.get('momentum.theme', 'auto');
   if (!ORDER.includes(mode)) mode = 'auto';
 
   apply(mode);
