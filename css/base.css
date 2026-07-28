@@ -16,7 +16,9 @@ body{
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  transition: background-color var(--dur-base) ease, color var(--dur-base) ease;
 }
+html{ transition: background-color var(--dur-base) ease; }
 
 h1, h2, h3, .display{
   font-family: 'Manrope', 'Inter', sans-serif;
@@ -28,7 +30,7 @@ h1, h2, h3, .display{
 /* Slim, unobtrusive scrollbar */
 ::-webkit-scrollbar{ width: 10px; height: 10px; }
 ::-webkit-scrollbar-track{ background: transparent; }
-::-webkit-scrollbar-thumb{ background: rgba(255,255,255,0.12); border-radius: 99px; border: 2px solid transparent; background-clip: padding-box; }
+::-webkit-scrollbar-thumb{ background: var(--scrollbar-thumb); border-radius: 99px; border: 2px solid transparent; background-clip: padding-box; }
 ::-webkit-scrollbar-thumb:hover{ background: rgba(255,255,255,0.2); background-clip: padding-box; }
 *{ scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.14) transparent; }
 

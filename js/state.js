@@ -3,7 +3,14 @@
    Every module reads/writes through this object so there is
    exactly one copy of the data in memory.
    ============================================================ */
-import { safeStorage } from './storage.js';
+import { safeStorage, migrateLegacyKeys } from './storage.js';
+
+migrateLegacyKeys([
+  ['momentum.theme', 'smarttodo.theme'],
+  ['momentum.tasks', 'smarttodo.tasks'],
+  ['momentum.completedCounter', 'smarttodo.completedCounter'],
+  ['momentum.dailyGoal', 'smarttodo.dailyGoal'],
+]);
 
 export const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 export const todayISO = () => new Date().toISOString().slice(0, 10);
@@ -16,9 +23,9 @@ const seedTasks = [
 ];
 
 export const state = {
-  tasks: safeStorage.get('momentum.tasks', seedTasks),
-  completedCounter: safeStorage.get('momentum.completedCounter', 1),
-  dailyGoal: safeStorage.get('momentum.dailyGoal', 3),
+  tasks: safeStorage.get('smarttodo.tasks', seedTasks),
+  completedCounter: safeStorage.get('smarttodo.completedCounter', 1),
+  dailyGoal: safeStorage.get('smarttodo.dailyGoal', 3),
 
   filter: 'all',
   sortMode: 'newest',
@@ -31,6 +38,9 @@ export const state = {
   lastAction: null, // { type, id, ... }
 };
 
-export function persistTasks(){ safeStorage.set('momentum.tasks', state.tasks); }
-export function persistCounter(){ safeStorage.set('momentum.completedCounter', state.completedCounter); }
-export function persistGoal(){ safeStorage.set('momentum.dailyGoal', state.dailyGoal); }
+export function persistTasks(){ safeStorage.set('smarttodo.tasks', state.tasks); }
+export function persistCounter(){ safeStorage.set('smarttodo.completedCounter', state.completedCounter); }
+export function persistGoal(){ safeStorage.set('smarttodo.dailyGoal', state.dailyGoal); }
+export function nextOrder(){
+  return state.tasks.length ? Math.max(...state.tasks.map(x => x.order)) + 1 : 0;
+}

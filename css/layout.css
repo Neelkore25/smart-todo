@@ -13,13 +13,29 @@
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
   box-shadow: var(--shadow-sm);
+  transition: background var(--dur-base) ease, border-color var(--dur-base) ease, box-shadow var(--dur-base) ease;
 }
 /* Sticky topbar needs a heavier blur: content scrolls directly behind it,
    so a light blur leaves underlying text legible and overlapping the pills. */
 .topbar.glass{
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
   background: linear-gradient(180deg, var(--glass-strong), var(--glass) 140%);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-md);
+  position: relative;
+}
+/* Glossy top highlight — a thin light seam along the upper edge, the kind
+   of detail that sells "glass" rather than just "blurred panel". Subtle by
+   design so it never fights with either theme. */
+.topbar.glass::before{
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.55) 50%, transparent);
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+  pointer-events: none;
 }
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
   .glass{ background: var(--surface); }

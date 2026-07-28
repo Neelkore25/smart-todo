@@ -3,11 +3,11 @@
    inline editing, and manual drag-and-drop reordering.
    ============================================================ */
 import { $, $$ } from './dom.js';
-import { state, uid, persistTasks, persistCounter } from './state.js';
+import { state, uid, persistTasks, persistCounter, nextOrder } from './state.js';
 import { paintIcons } from './icons.js';
 import { toast } from './toast.js';
 import { renderStats, isOverdue } from './stats.js';
-import { renderCalendar } from './calendar.js';
+
 
 const taskListEl = $('#taskList');
 const emptyStateEl = $('#emptyState');
@@ -98,7 +98,7 @@ export function renderList(){
   paintIcons();
   bindDragAndDrop();
   renderStats();
-  renderCalendar();
+ 
 }
 
 /* ---------- Actions ---------- */
@@ -113,7 +113,7 @@ export function addTask(data){
     recurring: data.recurring || 'none',
     done: false, doneAt: null,
     createdAt: Date.now(),
-    order: state.tasks.length ? Math.max(...state.tasks.map(x => x.order)) + 1 : 0
+   order: nextOrder()
   };
   state.tasks.push(t);
   persistTasks();
@@ -137,7 +137,7 @@ export function toggleDone(id){
       state.tasks.push({
         ...t, id: uid(), done: false, doneAt: null,
         due: base.toISOString().slice(0, 10),
-        createdAt: Date.now(), order: Math.max(...state.tasks.map(x => x.order)) + 1
+        createdAt: Date.now(), order: nextOrder()
       });
       toast(`Next "${t.text}" scheduled for ${base.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}`, { icon: 'repeat' });
     }
@@ -159,7 +159,8 @@ function deleteTaskConfirmed(id){
   const removed = state.tasks[idx];
   const li = taskListEl.querySelector(`[data-id="${id}"]`);
   if (li) li.classList.add('leaving');
-  setTimeout(() => {
+
+  const timerId = setTimeout(() => {
     state.tasks = state.tasks.filter(x => x.id !== id);
     persistTasks();
     renderList();
@@ -169,6 +170,7 @@ function deleteTaskConfirmed(id){
     icon: 'trash-2',
     actionLabel: 'Undo',
     onAction: () => {
+      clearTimeout(timerId);
       state.tasks.splice(idx, 0, removed);
       persistTasks();
       renderList();
@@ -193,7 +195,7 @@ taskListEl.addEventListener('click', (e) => {
     if (notesEl) notesEl.classList.toggle('open');
   }
 
-  else if (action === 'delete'){
+ else if (action === 'delete'){
     const actionsEl = li.querySelector('[data-role="actions"]');
     actionsEl.innerHTML = `
       <div class="confirm-delete">
@@ -235,18 +237,34 @@ taskListEl.addEventListener('focusout', (e) => {
 });
 
 /* ---------- Drag & drop (manual sort mode) ---------- */
+
+// A 1x1 transparent GIF used to suppress the browser's native drag-ghost
+// image. Native drag images are rasterized in isolation — our cards use a
+// translucent `--glass` background with no opaque backing, so that ghost
+// renders almost fully invisible (especially in light mode). Since the
+// list already reorders live under the cursor via `dragover` below, the
+// real, fully-opaque card *is* the drag visual — we don't need a second,
+// broken one layered on top of it.
+const BLANK_DRAG_IMAGE = new Image();
+BLANK_DRAG_IMAGE.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBTAA7';
+
 function bindDragAndDrop(){
   let dragEl = null;
   let rafId = null;
   let lastY = 0;
 
   $$('.task-card').forEach(card => {
-    card.addEventListener('dragstart', () => {
+    card.addEventListener('dragstart', (e) => {
       if (state.sortMode !== 'manual'){
         state.sortMode = 'manual';
         const sortSelect = $('#sortSelect');
         if (sortSelect) sortSelect.value = 'manual';
         toast('Sort switched to "Manual" for reordering', { icon: 'info' });
+      }
+      if (e.dataTransfer){
+        e.dataTransfer.effectAllowed = 'move';
+        // Suppress the native ghost — see BLANK_DRAG_IMAGE comment above.
+        e.dataTransfer.setDragImage(BLANK_DRAG_IMAGE, 0, 0);
       }
       dragEl = card;
       card.classList.add('dragging');
@@ -271,12 +289,45 @@ function bindDragAndDrop(){
       });
     });
     card.addEventListener('drop', () => {
-      const ids = $$('.task-card').map(c => c.dataset.id);
-      ids.forEach((id, i) => { const t = state.tasks.find(x => x.id === id); if (t) t.order = i; });
+      const visibleIds = $$('.task-card').map(c => c.dataset.id);
+      reindexAfterDrag(visibleIds);
       persistTasks();
     });
   });
 }
+
+/**
+ * Recomputes `order` for every task after a manual drag, not just the
+ * currently-visible/filtered ones. Dropping only reassigns order 0..N-1 to
+ * the visible cards, which — if a category/search/date filter is active —
+ * would collide with the untouched `order` values of hidden tasks and
+ * scramble the true manual order. This keeps hidden tasks' relative order
+ * intact and re-inserts the reordered visible block at its original spot.
+ */
+function reindexAfterDrag(visibleIds){
+  const visibleSet = new Set(visibleIds);
+  const fullSorted = state.tasks.slice().sort((a, b) => a.order - b.order);
+  const result = [];
+  let inserted = false;
+
+  for (const t of fullSorted){
+    if (visibleSet.has(t.id)){
+      if (!inserted){
+        visibleIds.forEach(id => {
+          const task = state.tasks.find(x => x.id === id);
+          if (task) result.push(task);
+        });
+        inserted = true;
+      }
+      // otherwise skip — already placed as part of the visible block above
+    } else {
+      result.push(t);
+    }
+  }
+
+  result.forEach((t, i) => { t.order = i; });
+}
+
 function getDragAfterElement(container, y){
   const els = [...container.querySelectorAll('.task-card:not(.dragging)')];
   return els.reduce((closest, child) => {
@@ -286,6 +337,7 @@ function getDragAfterElement(container, y){
     return closest;
   }, { offset: -Infinity }).element;
 }
+
 
 /* ---------- Add task form ---------- */
 export function initTaskForm(){
@@ -352,7 +404,7 @@ export function initExportImport(){
     const blob = new Blob([JSON.stringify(state.tasks, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = `momentum-tasks-${new Date().toISOString().slice(0, 10)}.json`;
+    a.href = url; a.download = `smart-todo-tasks-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
     toast('Tasks exported', { icon: 'download' });
@@ -372,7 +424,7 @@ export function initExportImport(){
           category: t.category || 'Other', due: t.due || '', recurring: t.recurring || 'none',
           done: !!t.done, doneAt: t.doneAt || null,
           createdAt: t.createdAt || Date.now(),
-          order: state.tasks.length ? Math.max(...state.tasks.map(x => x.order)) + 1 : 0
+          order: nextOrder()
         }));
         state.tasks = state.tasks.concat(imported);
         persistTasks();
