@@ -24,7 +24,13 @@ function getFilteredSortedTasks(){
     if (state.filter === 'active' && t.done) return false;
     if (state.filter === 'completed' && !t.done) return false;
     if (state.categoryFilter !== 'all' && t.category !== state.categoryFilter) return false;
-    if (state.calSelectedDate && t.due !== state.calSelectedDate) return false;
+    if (state.calSelectedDate) {
+      if (state.calSelectedDate === 'overdue') {
+        if (!isOverdue(t)) return false;
+      } else if (t.due !== state.calSelectedDate) {
+        return false;
+      }
+    }
     if (state.searchQuery && !t.text.toLowerCase().includes(state.searchQuery.toLowerCase())) return false;
     return true;
   });
@@ -52,8 +58,8 @@ function taskCardHTML(t){
   const overdue = isOverdue(t);
   const dueLabel = t.due ? new Date(t.due + 'T00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '';
   return `
-  <li class="task-card priority-${t.priority} ${t.done ? 'done' : ''}" data-id="${t.id}" draggable="true">
-    <span class="drag-handle" title="Drag to reorder"><i data-lucide="grip-vertical"></i></span>
+  <li class="task-card priority-${t.priority} ${t.done ? 'done' : ''}" data-id="${t.id}">
+    <span class="drag-handle" title="Drag to reorder" data-action="drag"><i data-lucide="grip-vertical"></i></span>
     <button class="check-btn" data-action="toggle" aria-label="${t.done ? 'Mark incomplete' : 'Mark complete'}">
       <svg viewBox="0 0 24 24"><path d="M4 12 L10 17.5 L20 5.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </button>
@@ -98,7 +104,6 @@ export function renderList(){
   paintIcons();
   bindDragAndDrop();
   renderStats();
- 
 }
 
 /* ---------- Actions ---------- */
@@ -113,7 +118,7 @@ export function addTask(data){
     recurring: data.recurring || 'none',
     done: false, doneAt: null,
     createdAt: Date.now(),
-   order: nextOrder()
+    order: nextOrder()
   };
   state.tasks.push(t);
   persistTasks();
@@ -195,7 +200,7 @@ taskListEl.addEventListener('click', (e) => {
     if (notesEl) notesEl.classList.toggle('open');
   }
 
- else if (action === 'delete'){
+  else if (action === 'delete'){
     const actionsEl = li.querySelector('[data-role="actions"]');
     actionsEl.innerHTML = `
       <div class="confirm-delete">
@@ -236,51 +241,96 @@ taskListEl.addEventListener('focusout', (e) => {
   else { span.textContent = t.text; }
 });
 
-/* ---------- Drag & drop (manual sort mode) ---------- */
+/* ---------- Drag & drop (Pointer Events - 0 Flicker Engine) ---------- */
 function bindDragAndDrop(){
-  let dragEl = null;
-  let rafId = null;
-  let lastY = 0;
+  const handles = $$('.drag-handle');
+  handles.forEach(handle => {
+    handle.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0 && e.pointerType === 'mouse') return;
+      const card = handle.closest('.task-card');
+      if (!card) return;
 
-  $$('.task-card').forEach(card => {
-    card.addEventListener('dragstart', () => {
+      e.preventDefault();
+
       if (state.sortMode !== 'manual'){
         state.sortMode = 'manual';
         const sortSelect = $('#sortSelect');
         if (sortSelect) sortSelect.value = 'manual';
         toast('Sort switched to "Manual" for reordering', { icon: 'info' });
       }
-      dragEl = card;
-      card.classList.add('dragging');
-      taskListEl.classList.add('drag-active');
-    });
-    card.addEventListener('dragend', () => {
-      card.classList.remove('dragging');
-      taskListEl.classList.remove('drag-active');
-      if (rafId) cancelAnimationFrame(rafId);
-      rafId = null; dragEl = null;
-    });
-    card.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      if (!dragEl) return;
-      lastY = e.clientY;
-      if (rafId) return; // one reorder per frame — avoids layout-thrash jitter
-      rafId = requestAnimationFrame(() => {
-        rafId = null;
-        const after = getDragAfterElement(taskListEl, lastY);
-        if (after == null) taskListEl.appendChild(dragEl);
-        else taskListEl.insertBefore(dragEl, after);
-      });
-    });
-    card.addEventListener('drop', () => {
-      const ids = $$('.task-card').map(c => c.dataset.id);
-      ids.forEach((id, i) => { const t = state.tasks.find(x => x.id === id); if (t) t.order = i; });
-      persistTasks();
+
+      const rect = card.getBoundingClientRect();
+      const offsetX = e.clientX - rect.left;
+      const offsetY = e.clientY - rect.top;
+
+      // Create placeholder
+      const placeholder = document.createElement('li');
+      placeholder.className = 'task-card placeholder';
+      placeholder.style.height = `${rect.height}px`;
+
+      // Create ghost element following cursor
+      const ghost = card.cloneNode(true);
+      ghost.classList.add('dragging-ghost');
+      ghost.style.width = `${rect.width}px`;
+      ghost.style.height = `${rect.height}px`;
+      ghost.style.left = `${rect.left}px`;
+      ghost.style.top = `${rect.top}px`;
+
+      document.body.appendChild(ghost);
+      card.parentNode.insertBefore(placeholder, card);
+      card.style.display = 'none';
+
+      let lastMoveY = e.clientY;
+      let rafId = null;
+
+      function onPointerMove(ev) {
+        lastMoveY = ev.clientY;
+        ghost.style.left = `${ev.clientX - offsetX}px`;
+        ghost.style.top = `${ev.clientY - offsetY}px`;
+
+        if (rafId) return;
+        rafId = requestAnimationFrame(() => {
+          rafId = null;
+          const after = getDragAfterElement(taskListEl, lastMoveY, placeholder);
+          if (after == null) {
+            taskListEl.appendChild(placeholder);
+          } else {
+            taskListEl.insertBefore(placeholder, after);
+          }
+        });
+      }
+
+      function onPointerUp() {
+        window.removeEventListener('pointermove', onPointerMove);
+        window.removeEventListener('pointerup', onPointerUp);
+        window.removeEventListener('pointercancel', onPointerUp);
+
+        if (rafId) cancelAnimationFrame(rafId);
+
+        // Put real card into place
+        card.style.display = '';
+        placeholder.parentNode.insertBefore(card, placeholder);
+        placeholder.remove();
+        ghost.remove();
+
+        // Update task order state
+        const cards = $$('#taskList .task-card');
+        cards.forEach((c, index) => {
+          const t = state.tasks.find(x => x.id === c.dataset.id);
+          if (t) t.order = index;
+        });
+        persistTasks();
+      }
+
+      window.addEventListener('pointermove', onPointerMove, { passive: false });
+      window.addEventListener('pointerup', onPointerUp);
+      window.addEventListener('pointercancel', onPointerUp);
     });
   });
 }
-function getDragAfterElement(container, y){
-  const els = [...container.querySelectorAll('.task-card:not(.dragging)')];
+
+function getDragAfterElement(container, y, excludeEl){
+  const els = [...container.querySelectorAll('.task-card:not(.dragging-ghost)')].filter(el => el !== excludeEl && el.style.display !== 'none');
   return els.reduce((closest, child) => {
     const box = child.getBoundingClientRect();
     const offset = y - box.top - box.height / 2;
@@ -309,11 +359,15 @@ export function initTaskForm(){
     taskInput.focus();
   });
 
-  $('#expandAddBtn').addEventListener('click', () => {
-    const willShow = addExtra.hidden;
-    addExtra.hidden = !addExtra.hidden;
-    $('#expandAddBtn').setAttribute('aria-expanded', String(willShow));
-  });
+  const toggleDetailsBtn = $('#toggleDetailsBtn') || $('#expandAddBtn');
+  if (toggleDetailsBtn) {
+    toggleDetailsBtn.addEventListener('click', () => {
+      const willShow = addExtra.hidden;
+      addExtra.hidden = !addExtra.hidden;
+      toggleDetailsBtn.setAttribute('aria-expanded', String(willShow));
+      toggleDetailsBtn.textContent = willShow ? '- Details' : '+ Details';
+    });
+  }
 }
 
 /* ---------- Filter / sort / search / category ---------- */

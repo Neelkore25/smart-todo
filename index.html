@@ -78,18 +78,28 @@
         <option value="Other">Other</option>
       </select>
       <div class="date-filter-wrap">
-        <button id="datePickerToggle" class="icon-btn" type="button" title="Filter by date" aria-label="Filter by date" aria-expanded="false">
+        <button id="datePickerToggle" class="date-trigger-btn" type="button" title="Filter by date" aria-label="Filter by date" aria-expanded="false">
           <i data-lucide="calendar"></i>
+          <span id="dateFilterLabel">Calendar</span>
         </button>
         <div class="date-popover glass" id="datePopover" hidden>
+          <div class="date-popover-header">
+            <span class="popover-title">Filter by Date</span>
+            <span id="dateFilterActiveBadge" class="active-badge" hidden>Active</span>
+          </div>
+          <div class="date-presets">
+            <button type="button" class="preset-btn" data-preset="today">Today</button>
+            <button type="button" class="preset-btn" data-preset="tomorrow">Tomorrow</button>
+            <button type="button" class="preset-btn" data-preset="overdue">Overdue</button>
+          </div>
           <div class="date-popover-row">
             <select id="dpDay" aria-label="Day"></select>
             <select id="dpMonth" aria-label="Month"></select>
             <select id="dpYear" aria-label="Year"></select>
           </div>
           <div class="date-popover-actions">
-            <button type="button" id="dpClear">Clear</button>
-            <button type="button" id="dpOk" class="primary">OK</button>
+            <button type="button" id="dpClear" class="secondary">Clear Filter</button>
+            <button type="button" id="dpOk" class="primary">Apply Date</button>
           </div>
         </div>
       </div>
@@ -102,7 +112,7 @@
           <input id="taskInput" type="text" placeholder="What needs to get done?  ( n )" maxlength="200" required />
           <button type="button" id="micBtn" class="icon-btn" title="Voice input" aria-label="Voice input"><i data-lucide="mic"></i></button>
           <button type="button" id="aiSuggestBtn" class="icon-btn" title="Suggest a task (demo)" aria-label="Suggest a task"><i data-lucide="sparkles"></i></button>
-          <button type="button" id="expandAddBtn" class="icon-btn" title="More options" aria-label="More options" aria-expanded="false"><i data-lucide="sliders-horizontal"></i></button>
+          <button type="button" id="toggleDetailsBtn" class="details-toggle-btn" aria-expanded="false" title="Add priority, date or notes">+ Details</button>
           <button type="submit" class="btn-primary">Add <i data-lucide="plus"></i></button>
         </div>
         <div class="add-row-extra" id="addExtra" hidden>

@@ -40,8 +40,8 @@
 }
 .app.ready{ opacity: 1; transform: none; }
 
-.main-col{ display: flex; flex-direction: column; gap: var(--space-4); min-width: 0; }
-.side-col{ display: flex; flex-direction: column; gap: var(--space-4); }
+.main-col{ display: flex; flex-direction: column; gap: var(--space-4); min-width: 0; position: relative; z-index: 1; }
+.side-col{ display: flex; flex-direction: column; gap: var(--space-4); position: relative; z-index: 1; }
 
 /* ---------- Header ---------- */
 .topbar{

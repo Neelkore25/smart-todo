@@ -2,38 +2,41 @@
    DESIGN TOKENS
    Single source of truth for color, spacing, radius, motion and elevation.
    ========================================================================== */
-:root{
+:root {
   color-scheme: dark;
 
   /* ---------- Color: surfaces ---------- */
-  --bg:            #09090B;
-  --surface:       #111118;
-  --surface-2:     #16161F;
-  --glass:         rgba(255,255,255,0.06);
-  --glass-strong:  rgba(255,255,255,0.09);
-  --border:        rgba(255,255,255,0.10);
-  --border-strong: rgba(255,255,255,0.16);
+  --bg:            #09090D;
+  --surface:       #12121A;
+  --surface-2:     #1A1A26;
+  --glass:         rgba(255, 255, 255, 0.05);
+  --glass-hover:   rgba(255, 255, 255, 0.09);
+  --glass-strong:  rgba(255, 255, 255, 0.12);
+  --border:        rgba(255, 255, 255, 0.10);
+  --border-strong: rgba(255, 255, 255, 0.22);
+  --border-accent: rgba(124, 92, 255, 0.40);
 
   /* ---------- Color: brand ---------- */
-  --accent:        #7C5CFF;
-  --accent-soft:   rgba(124,92,255,0.16);
-  --accent-2:      #00C2FF;
-  --accent-2-soft: rgba(0,194,255,0.14);
-  --accent-grad:   linear-gradient(135deg, var(--accent), var(--accent-2));
+  --accent:        #8B5CF6;
+  --accent-light:  #A78BFA;
+  --accent-soft:   rgba(139, 92, 246, 0.20);
+  --accent-2:      #06B6D4;
+  --accent-2-soft: rgba(6, 182, 212, 0.18);
+  --accent-grad:   linear-gradient(135deg, #8B5CF6, #06B6D4);
 
   /* ---------- Color: text ---------- */
   --text:          #FFFFFF;
-  --text-2:        #B3B3B3;
-  --text-3:        #71717A;
+  --text-2:        #CBD5E1;
+  --text-3:        #94A3B8;
 
   /* ---------- Color: semantic ---------- */
-  --success:       #34D399;
-  --danger:        #FB6B7C;
-  --warning:       #FFB454;
+  --success:       #10B981;
+  --danger:        #F43F5E;
+  --warning:       #F59E0B;
 
-  --priority-high: #FB6B7C;
-  --priority-med:  #FFB454;
-  --priority-low:  #00C2FF;
+  --priority-high: #F43F5E;
+  --priority-med:  #F59E0B;
+  --priority-low:  #06B6D4;
 
   /* ---------- Spacing (8px system) ---------- */
   --space-1: 4px;
@@ -51,18 +54,18 @@
   --r-lg: 20px;
   --r-full: 999px;
 
-   /* ---------- Elevation ---------- */
---shadow-sm: 0 1px 2px rgba(0,0,0,0.4);
---shadow-md: 0 8px 24px -8px rgba(0,0,0,0.5);
---shadow-lg: 0 24px 48px -16px rgba(0,0,0,0.6);
---shadow-accent: 0 8px 24px -8px rgba(124,92,255,0.45);
+  /* ---------- Elevation ---------- */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 10px 30px -10px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 25px 50px -12px rgba(0, 0, 0, 0.75);
+  --shadow-accent: 0 8px 25px -6px rgba(139, 92, 246, 0.45);
 
   /* ---------- Motion ---------- */
-  --ease: cubic-bezier(.22,1,.36,1);
-  --ease-out: cubic-bezier(.16,1,.3,1);
+  --ease: cubic-bezier(.22, 1, .36, 1);
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
   --dur-fast: .15s;
   --dur-base: .25s;
-  --dur-slow: .5s;
+  --dur-slow: .45s;
 
   /* ---------- Type scale ---------- */
   --fs-xs: .75rem;
@@ -72,14 +75,12 @@
   --fs-lg: 1.25rem;
   --fs-xl: 1.5rem;
 
-
-
-/* ---------- Scrollbar ---------- */
---scrollbar-thumb: rgba(255,255,255,0.12);
+  /* ---------- Scrollbar ---------- */
+  --scrollbar-thumb: rgba(255, 255, 255, 0.18);
 }
 
-@media (prefers-reduced-motion: reduce){
-  *{
+@media (prefers-reduced-motion: reduce) {
+  * {
     animation-duration: .001s !important;
     transition-duration: .001s !important;
   }
@@ -87,74 +88,82 @@
 
 /* ---------- Light theme (explicit, or auto + OS light) ---------- */
 html[data-theme="light"],
-html[data-theme="auto"]{
-  --bg-light:            #F3F3F7;
+html[data-theme="auto"] {
+  --bg-light:            #F8FAFC;
   --surface-light:       #FFFFFF;
 
   /* Premium glass values */
-  --glass-light:         rgba(255,255,255,0.45);
-  --glass-strong-light:  rgba(255,255,255,0.70);
+  --glass-light:         rgba(255, 255, 255, 0.75);
+  --glass-hover-light:   rgba(255, 255, 255, 0.90);
+  --glass-strong-light:  rgba(255, 255, 255, 0.95);
 
-  --border-light:        rgba(20,20,30,0.10);
-  --border-strong-light: rgba(20,20,30,0.18);
+  --border-light:        rgba(15, 23, 42, 0.08);
+  --border-strong-light: rgba(15, 23, 42, 0.18);
+  --border-accent-light: rgba(139, 92, 246, 0.35);
 
-  --text-light:          #17171C;
-  --text-2-light:        #55555F;
-  --text-3-light:        #6B6B76;
+  --text-light:          #0F172A;
+  --text-2-light:        #334155;
+  --text-3-light:        #64748B;
 
-  --scrollbar-thumb-light: rgba(20,20,30,0.18);
+  --scrollbar-thumb-light: rgba(15, 23, 42, 0.20);
 }
 
 /* Explicit Light Theme */
-html[data-theme="light"]{
+html[data-theme="light"] {
   color-scheme: light;
 
   --bg: var(--bg-light);
   --surface: var(--surface-light);
+  --surface-2: #F1F5F9;
 
   --glass: var(--glass-light);
+  --glass-hover: var(--glass-hover-light);
   --glass-strong: var(--glass-strong-light);
 
   --border: var(--border-light);
   --border-strong: var(--border-strong-light);
+  --border-accent: var(--border-accent-light);
 
- --text: var(--text-light);
---text-2: var(--text-2-light);
---text-3: var(--text-3-light);
+  --text: var(--text-light);
+  --text-2: var(--text-2-light);
+  --text-3: var(--text-3-light);
 
---scrollbar-thumb: var(--scrollbar-thumb-light);
+  --scrollbar-thumb: var(--scrollbar-thumb-light);
 
-  /* ---------- Light-specific elevation ---------- */
-  --shadow-sm: 0 1px 2px rgba(23,23,28,0.06);
-  --shadow-md: 0 8px 24px -8px rgba(23,23,28,0.10);
-  --shadow-lg: 0 24px 48px -16px rgba(23,23,28,0.14);
-  --shadow-accent: 0 8px 20px -6px rgba(124,92,255,0.28);
+  /* Light-specific elevation */
+  --shadow-sm: 0 2px 4px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 10px 25px -8px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 20px 40px -12px rgba(15, 23, 42, 0.12);
+  --shadow-accent: 0 8px 20px -6px rgba(139, 92, 246, 0.30);
 }
 
 /* Auto Theme + OS Light */
-@media (prefers-color-scheme: light){
-  html[data-theme="auto"]{
+@media (prefers-color-scheme: light) {
+  html[data-theme="auto"] {
     color-scheme: light;
 
     --bg: var(--bg-light);
     --surface: var(--surface-light);
+    --surface-2: #F1F5F9;
 
     --glass: var(--glass-light);
+    --glass-hover: var(--glass-hover-light);
     --glass-strong: var(--glass-strong-light);
 
     --border: var(--border-light);
     --border-strong: var(--border-strong-light);
+    --border-accent: var(--border-accent-light);
 
-   --text: var(--text-light);
---text-2: var(--text-2-light);
---text-3: var(--text-3-light);
+    --text: var(--text-light);
+    --text-2: var(--text-2-light);
+    --text-3: var(--text-3-light);
 
---scrollbar-thumb: var(--scrollbar-thumb-light);
+    --scrollbar-thumb: var(--scrollbar-thumb-light);
 
-    /* ---------- Light-specific elevation ---------- */
-    --shadow-sm: 0 1px 2px rgba(23,23,28,0.06);
-    --shadow-md: 0 8px 24px -8px rgba(23,23,28,0.10);
-    --shadow-lg: 0 24px 48px -16px rgba(23,23,28,0.14);
-    --shadow-accent: 0 8px 20px -6px rgba(124,92,255,0.28);
+    /* Light-specific elevation */
+    --shadow-sm: 0 2px 4px rgba(15, 23, 42, 0.04);
+    --shadow-md: 0 10px 25px -8px rgba(15, 23, 42, 0.08);
+    --shadow-lg: 0 20px 40px -12px rgba(15, 23, 42, 0.12);
+    --shadow-accent: 0 8px 20px -6px rgba(139, 92, 246, 0.30);
   }
 }
