@@ -9,6 +9,9 @@ import { initCalendar } from './calendar.js';
 import { initPomodoro, initDailyGoal, initVoiceInput, initSuggestions } from './features.js';
 import { initShortcuts } from './shortcuts.js';
 import { initTheme } from './theme.js';
+import { initAuth } from './auth.js';
+
+window.paintIcons = paintIcons;
 
 /* Ripple effect on primary interactive buttons */
 function initRipple(){
@@ -51,6 +54,7 @@ function init(){
   initVoiceInput();
   initSuggestions();
   initShortcuts();
+  initAuth(renderList);
   initRipple();
   initLoader();
 

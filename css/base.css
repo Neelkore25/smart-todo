@@ -25,7 +25,8 @@ h1, h2, h3, .display{
   letter-spacing: -0.01em;
 }
 
-::selection{ background: var(--accent); color: #fff; }
+::selection{ background: var(--accent); color: #FFFFFF; }
+::-moz-selection{ background: var(--accent); color: #FFFFFF; }
 
 /* Slim, unobtrusive scrollbar */
 ::-webkit-scrollbar{ width: 10px; height: 10px; }
@@ -45,7 +46,12 @@ h1, h2, h3, .display{
 a{ color: var(--accent-2); }
 
 button, input, select, textarea{ font-family: inherit; }
-input, textarea, [contenteditable="true"]{ caret-color: var(--accent); }
+
+/* High-contrast typing cursor across all text fields */
+input, textarea, [contenteditable="true"]{
+  caret-color: #06B6D4; /* Vivid bright cyan caret — never camouflaged */
+  color: var(--text);
+}
 
 /* ---------- Ambient background ----------
    Two soft, slow-moving radial glows behind the glass layer. Pure CSS,
