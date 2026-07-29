@@ -42,14 +42,14 @@ function apply(mode) {
 }
 
 export function initTheme() {
-  let mode = safeStorage.get('momentum.theme', 'auto');
+  let mode = safeStorage.get('smarttodo.theme', 'auto');
   if (!ORDER.includes(mode)) mode = 'auto';
 
   apply(mode);
 
   $('#themeToggle').addEventListener('click', () => {
     mode = ORDER[(ORDER.indexOf(mode) + 1) % ORDER.length];
-    safeStorage.set('momentum.theme', mode);
+    safeStorage.set('smarttodo.theme', mode);
     apply(mode);
   });
 }

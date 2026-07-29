@@ -14,7 +14,7 @@
   --glass-strong:  rgba(255, 255, 255, 0.12);
   --border:        rgba(255, 255, 255, 0.10);
   --border-strong: rgba(255, 255, 255, 0.22);
-  --border-accent: rgba(124, 92, 255, 0.40);
+  --border-accent: rgba(139, 92, 246, 0.40);
 
   /* ---------- Color: brand ---------- */
   --accent:        #8B5CF6;
@@ -37,6 +37,21 @@
   --priority-high: #F43F5E;
   --priority-med:  #F59E0B;
   --priority-low:  #06B6D4;
+
+  /* ---------- Theme-aware overlays & badges ---------- */
+  --overlay-soft:  rgba(255, 255, 255, 0.06);
+  --overlay-med:   rgba(255, 255, 255, 0.08);
+  --ripple-color:  rgba(255, 255, 255, 0.35);
+  --notes-bg:      rgba(0, 0, 0, 0.30);
+
+  --badge-cat-color:     #A78BFA;
+  --badge-due-color:     #7FE0FF;
+  --badge-overdue-color: var(--danger);
+
+  --toast-bg:        #16161F;
+  --toast-text:      #FFFFFF;
+  --toast-btn-bg:    rgba(255, 255, 255, 0.1);
+  --toast-btn-hover: rgba(255, 255, 255, 0.18);
 
   /* ---------- Spacing (8px system) ---------- */
   --space-1: 4px;
@@ -92,7 +107,6 @@ html[data-theme="auto"] {
   --bg-light:            #F8FAFC;
   --surface-light:       #FFFFFF;
 
-  /* Premium glass values */
   --glass-light:         rgba(255, 255, 255, 0.75);
   --glass-hover-light:   rgba(255, 255, 255, 0.90);
   --glass-strong-light:  rgba(255, 255, 255, 0.95);
@@ -106,6 +120,20 @@ html[data-theme="auto"] {
   --text-3-light:        #64748B;
 
   --scrollbar-thumb-light: rgba(15, 23, 42, 0.20);
+
+  --overlay-soft-light: rgba(20, 20, 30, 0.05);
+  --overlay-med-light:  rgba(20, 20, 30, 0.07);
+  --ripple-color-light: rgba(20, 20, 30, 0.16);
+  --notes-bg-light:     rgba(20, 20, 30, 0.035);
+
+  --badge-cat-color-light:     #5B3DE0;
+  --badge-due-color-light:     #0089B3;
+  --badge-overdue-color-light: #D93A50;
+
+  --toast-bg-light:        #FFFFFF;
+  --toast-text-light:      #17171C;
+  --toast-btn-bg-light:    rgba(20, 20, 30, 0.06);
+  --toast-btn-hover-light: rgba(20, 20, 30, 0.1);
 }
 
 /* Explicit Light Theme */
@@ -130,7 +158,20 @@ html[data-theme="light"] {
 
   --scrollbar-thumb: var(--scrollbar-thumb-light);
 
-  /* Light-specific elevation */
+  --overlay-soft: var(--overlay-soft-light);
+  --overlay-med:  var(--overlay-med-light);
+  --ripple-color: var(--ripple-color-light);
+  --notes-bg:     var(--notes-bg-light);
+
+  --badge-cat-color:     var(--badge-cat-color-light);
+  --badge-due-color:     var(--badge-due-color-light);
+  --badge-overdue-color: var(--badge-overdue-color-light);
+
+  --toast-bg:        var(--toast-bg-light);
+  --toast-text:      var(--toast-text-light);
+  --toast-btn-bg:    var(--toast-btn-bg-light);
+  --toast-btn-hover: var(--toast-btn-hover-light);
+
   --shadow-sm: 0 2px 4px rgba(15, 23, 42, 0.04);
   --shadow-md: 0 10px 25px -8px rgba(15, 23, 42, 0.08);
   --shadow-lg: 0 20px 40px -12px rgba(15, 23, 42, 0.12);
@@ -160,7 +201,20 @@ html[data-theme="light"] {
 
     --scrollbar-thumb: var(--scrollbar-thumb-light);
 
-    /* Light-specific elevation */
+    --overlay-soft: var(--overlay-soft-light);
+    --overlay-med:  var(--overlay-med-light);
+    --ripple-color: var(--ripple-color-light);
+    --notes-bg:     var(--notes-bg-light);
+
+    --badge-cat-color:     var(--badge-cat-color-light);
+    --badge-due-color:     var(--badge-due-color-light);
+    --badge-overdue-color: var(--badge-overdue-color-light);
+
+    --toast-bg:        var(--toast-bg-light);
+    --toast-text:      var(--toast-text-light);
+    --toast-btn-bg:    var(--toast-btn-bg-light);
+    --toast-btn-hover: var(--toast-btn-hover-light);
+
     --shadow-sm: 0 2px 4px rgba(15, 23, 42, 0.04);
     --shadow-md: 0 10px 25px -8px rgba(15, 23, 42, 0.08);
     --shadow-lg: 0 20px 40px -12px rgba(15, 23, 42, 0.12);

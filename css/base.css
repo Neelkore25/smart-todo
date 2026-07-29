@@ -16,7 +16,9 @@ body{
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  transition: background-color var(--dur-base) ease, color var(--dur-base) ease;
 }
+html{ transition: background-color var(--dur-base) ease; }
 
 h1, h2, h3, .display{
   font-family: 'Manrope', 'Inter', sans-serif;

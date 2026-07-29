@@ -21,7 +21,7 @@
 .progress-info{ display: flex; justify-content: space-between; align-items: baseline; margin-bottom: var(--space-3); font-size: var(--fs-sm); color: var(--text-2); }
 #progressLabel{ font-weight: 700; color: var(--text); font-size: var(--fs-base); }
 #goalLabel{ color: var(--accent-2); font-weight: 600; }
-.progress-track{ height: 8px; border-radius: var(--r-full); background: rgba(255,255,255,0.06); overflow: hidden; }
+.progress-track{ height: 8px; border-radius: var(--r-full); background: var(--overlay-soft); overflow: hidden; }
 .progress-fill{
   height: 100%; border-radius: var(--r-full);
   background: var(--accent-grad);
@@ -49,7 +49,7 @@
   font-size: var(--fs-sm); font-weight: 600; color: var(--text-2);
   transition: color var(--dur-base) ease, background var(--dur-base) ease;
 }
-.tab:not(.active):hover{ color: var(--text); background: rgba(255,255,255,0.08); }
+.tab:not(.active):hover{ color: var(--text); background: var(--overlay-soft); }
 .tab.active{ background: var(--accent-grad); color: #fff; box-shadow: var(--shadow-accent); }
 
 select{
@@ -108,8 +108,11 @@ select:focus-visible{ border-color: var(--accent); }
 
 /* ripple */
 .ripple{
-  position: absolute; border-radius: 50%; background: rgba(255,255,255,.35);
+  position: absolute; border-radius: 50%; background: var(--ripple-color);
   transform: scale(0); animation: rippleAnim .55s ease-out; pointer-events: none;
+}
+.btn-primary .ripple, .pomo-controls button.primary .ripple, .date-popover-actions button.primary .ripple{
+  background: rgba(255,255,255,.35);
 }
 @keyframes rippleAnim{ to{ transform: scale(3); opacity: 0; } }
 
@@ -125,7 +128,7 @@ select:focus-visible{ border-color: var(--accent); }
   border-left: 4px solid var(--priority-low);
   transition: transform var(--dur-base) var(--ease), opacity var(--dur-base) var(--ease),
               box-shadow var(--dur-base) ease, background var(--dur-base) ease, border-color var(--dur-base) ease;
-  cursor: default; /* Explicit: fix pointer/grab issues on entire card */
+  cursor: default;
   user-select: none;
   animation: cardIn .3s var(--ease);
 }
@@ -206,15 +209,15 @@ select:focus-visible{ border-color: var(--accent); }
   font-size: .68rem; font-weight: 700; padding: 3px 9px; border-radius: var(--r-full); white-space: nowrap;
   display: inline-flex; align-items: center; gap: 4px;
 }
-.badge.cat{ background: var(--accent-soft); color: var(--accent-light); }
-.badge.due{ background: var(--accent-2-soft); color: #7FE0FF; }
-.badge.due.overdue{ background: rgba(244, 63, 94, 0.18); color: var(--danger); }
+.badge.cat{ background: var(--accent-soft); color: var(--badge-cat-color); }
+.badge.due{ background: var(--accent-2-soft); color: var(--badge-due-color); }
+.badge.due.overdue{ background: rgba(244, 63, 94, 0.18); color: var(--badge-overdue-color); }
 .badge svg{ width: 10px; height: 10px; }
 
 .task-meta{ display: flex; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-2); }
 .task-notes{
   margin-top: var(--space-2); font-size: var(--fs-sm); color: var(--text-2);
-  background: rgba(0,0,0,0.30);
+  background: var(--notes-bg);
   border: 1px solid var(--border);
   padding: 9px 12px; border-radius: var(--r-sm); display: none; line-height: 1.5;
 }
@@ -226,7 +229,7 @@ select:focus-visible{ border-color: var(--accent); }
   width: 30px; height: 30px; border-radius: 8px; border: none; background: transparent; color: var(--text-2);
   cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all var(--dur-fast) ease;
 }
-.mini-btn:hover{ background: rgba(255,255,255,0.12); color: var(--text); transform: translateY(-1px); }
+.mini-btn:hover{ background: var(--overlay-med); color: var(--text); transform: translateY(-1px); }
 .mini-btn:active{ transform: scale(.92); }
 .mini-btn.danger:hover{ color: var(--danger); background: rgba(244, 63, 94, 0.16); }
 .mini-btn svg{ width: 14px; height: 14px; }
@@ -234,7 +237,7 @@ select:focus-visible{ border-color: var(--accent); }
 .confirm-delete{ display: flex; align-items: center; gap: var(--space-2); font-size: var(--fs-xs); color: var(--text-2); animation: cardIn .18s var(--ease); white-space: nowrap; }
 .confirm-delete button{ border: none; padding: 6px 11px; border-radius: 8px; font-size: .72rem; font-weight: 700; cursor: pointer; }
 .confirm-delete .yes{ background: var(--danger); color: #fff; }
-.confirm-delete .no{ background: rgba(255,255,255,0.1); color: var(--text); }
+.confirm-delete .no{ background: var(--overlay-med); color: var(--text); }
 
 /* ---------- Empty state ---------- */
 .empty-state{ text-align: center; padding: var(--space-8) var(--space-4); color: var(--text-2); animation: cardIn .35s var(--ease); }
@@ -286,8 +289,6 @@ select:focus-visible{ border-color: var(--accent); }
 .date-popover-actions button:hover{ color: var(--text); border-color: var(--border-strong); }
 .date-popover-actions button.primary{ background: var(--accent-grad); color: #fff; border: none; box-shadow: var(--shadow-accent); }
 .date-popover-actions button.secondary{ background: transparent; border-color: var(--border); }
-}
-.date-popover-actions button.primary{ background: var(--accent-grad); color: #fff; border: none; box-shadow: var(--shadow-accent); }
 
 /* ---------- Sidebar widgets ---------- */
 .widget{ padding: var(--space-4); }
@@ -341,17 +342,18 @@ select:focus-visible{ border-color: var(--accent); }
 /* ---------- Toasts ---------- */
 .toast-container{ position: fixed; bottom: var(--space-5); right: var(--space-5); z-index: 1000; display: flex; flex-direction: column; gap: var(--space-2); max-width: 320px; }
 .toast{
-  background: #16161F; border: 1px solid var(--border-strong); color: #fff; padding: 13px 15px; border-radius: var(--r-md);
+  background: var(--toast-bg); border: 1px solid var(--border-strong); color: var(--toast-text); padding: 13px 15px; border-radius: var(--r-md);
   border-left: 3px solid var(--accent);
   display: flex; align-items: center; gap: var(--space-2); font-size: var(--fs-sm);
   box-shadow: var(--shadow-lg);
   animation: toastIn .3s var(--ease);
+  transition: background var(--dur-base) ease, color var(--dur-base) ease, border-color var(--dur-base) ease;
 }
 .toast.leaving{ animation: toastOut .22s var(--ease) forwards; }
 @keyframes toastIn{ from{ opacity: 0; transform: translateX(24px); } to{ opacity: 1; transform: none; } }
 @keyframes toastOut{ to{ opacity: 0; transform: translateX(24px); } }
-.toast button{ background: rgba(255,255,255,.1); border: none; color: #fff; padding: 5px 11px; border-radius: 7px; font-size: .7rem; font-weight: 700; cursor: pointer; flex-shrink: 0; transition: background var(--dur-base) ease; }
-.toast button:hover{ background: rgba(255,255,255,.18); }
+.toast button{ background: var(--toast-btn-bg); border: none; color: var(--toast-text); padding: 5px 11px; border-radius: 7px; font-size: .7rem; font-weight: 700; cursor: pointer; flex-shrink: 0; transition: background var(--dur-base) ease; }
+.toast button:hover{ background: var(--toast-btn-hover); }
 .toast svg{ width: 15px; height: 15px; flex-shrink: 0; color: var(--accent-2); }
 
 /* ---------- Confetti ---------- */

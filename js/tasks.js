@@ -8,7 +8,6 @@ import { paintIcons } from './icons.js';
 import { toast } from './toast.js';
 import { renderStats, isOverdue } from './stats.js';
 
-
 const taskListEl = $('#taskList');
 const emptyStateEl = $('#emptyState');
 const emptyTitleEl = $('#emptyTitle');
@@ -408,7 +407,7 @@ export function initExportImport(){
     const blob = new Blob([JSON.stringify(state.tasks, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = `momentum-tasks-${new Date().toISOString().slice(0, 10)}.json`;
+    a.href = url; a.download = `smart-todo-tasks-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
     toast('Tasks exported', { icon: 'download' });
