@@ -113,22 +113,18 @@
         </button>
         <div class="date-popover glass" id="datePopover" hidden>
           <div class="date-popover-header">
-            <span class="popover-title">Filter by Date</span>
-            <span id="dateFilterActiveBadge" class="active-badge" hidden>Active</span>
+            <button type="button" class="cal-nav-btn" id="calPrevMonth" title="Previous month"><i data-lucide="chevron-left"></i></button>
+            <span class="popover-title" id="calMonthYearLabel">July 2026</span>
+            <button type="button" class="cal-nav-btn" id="calNextMonth" title="Next month"><i data-lucide="chevron-right"></i></button>
           </div>
           <div class="date-presets">
             <button type="button" class="preset-btn" data-preset="today">Today</button>
             <button type="button" class="preset-btn" data-preset="tomorrow">Tomorrow</button>
             <button type="button" class="preset-btn" data-preset="overdue">Overdue</button>
           </div>
-          <div class="date-popover-row">
-            <select id="dpDay" aria-label="Day"></select>
-            <select id="dpMonth" aria-label="Month"></select>
-            <select id="dpYear" aria-label="Year"></select>
-          </div>
+          <div class="cal-grid-wrapper" id="calGridDays"></div>
           <div class="date-popover-actions">
-            <button type="button" id="dpClear" class="secondary">Clear Filter</button>
-            <button type="button" id="dpOk" class="primary">Apply Date</button>
+            <button type="button" id="dpClear" class="secondary full-w">Clear Filter</button>
           </div>
         </div>
       </div>

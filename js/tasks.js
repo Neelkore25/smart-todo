@@ -357,16 +357,6 @@ export function initTaskForm(){
     $('#dueDateInput').value = '';
     taskInput.focus();
   });
-
-  const toggleDetailsBtn = $('#toggleDetailsBtn') || $('#expandAddBtn');
-  if (toggleDetailsBtn) {
-    toggleDetailsBtn.addEventListener('click', () => {
-      const willShow = addExtra.hidden;
-      addExtra.hidden = !addExtra.hidden;
-      toggleDetailsBtn.setAttribute('aria-expanded', String(willShow));
-      toggleDetailsBtn.textContent = willShow ? '- Details' : '+ Details';
-    });
-  }
 }
 
 /* ---------- Filter / sort / search / category ---------- */
