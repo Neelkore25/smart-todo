@@ -15,7 +15,6 @@ const emptyTitleEl = $('#emptyTitle');
 const emptySubtitleEl = $('#emptySubtitle');
 const addForm = $('#addForm');
 const taskInput = $('#taskInput');
-const addExtra = $('#addExtra');
 
 const priorityRank = { high: 0, med: 1, low: 2 };
 
@@ -248,10 +247,15 @@ taskListEl.addEventListener('focusout', (e) => {
 const BLANK_DRAG_IMAGE = new Image();
 BLANK_DRAG_IMAGE.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBTAA7';
 
+// Sentinel used to tell "haven't computed a target yet" apart from a real
+// `null` target (null legitimately means "drop at the end of the list").
+const UNSET = Symbol('unset');
+
 function bindDragAndDrop(){
   let dragEl = null;
   let rafId = null;
   let lastY = 0;
+  let lastAfter = UNSET;
 
   $$('.task-card').forEach(card => {
     card.addEventListener('dragstart', (e) => {
@@ -267,6 +271,7 @@ function bindDragAndDrop(){
         e.dataTransfer.setDragImage(BLANK_DRAG_IMAGE, 0, 0);
       }
       dragEl = card;
+      lastAfter = UNSET;
       card.classList.add('dragging');
       taskListEl.classList.add('drag-active');
     });
@@ -274,24 +279,67 @@ function bindDragAndDrop(){
       card.classList.remove('dragging');
       taskListEl.classList.remove('drag-active');
       if (rafId) cancelAnimationFrame(rafId);
-      rafId = null; dragEl = null;
+      rafId = null; dragEl = null; lastAfter = UNSET;
     });
     card.addEventListener('dragover', (e) => {
       e.preventDefault();
       if (!dragEl) return;
       lastY = e.clientY;
-      if (rafId) return; // one reorder per frame — avoids layout-thrash jitter
+      if (rafId) return; // one reorder check per frame — avoids layout-thrash jitter
       rafId = requestAnimationFrame(() => {
         rafId = null;
         const after = getDragAfterElement(taskListEl, lastY);
-        if (after == null) taskListEl.appendChild(dragEl);
-        else taskListEl.insertBefore(dragEl, after);
+        // This is the actual source of the flicker: the DOM used to be
+        // reordered on *every* frame, even when the target slot hadn't
+        // changed, forcing a redundant reflow each time. Only touch the
+        // DOM when it's actually moving somewhere new.
+        if (after === lastAfter) return;
+        lastAfter = after;
+        reorderWithFlip(dragEl, after);
       });
     });
     card.addEventListener('drop', () => {
       const visibleIds = $$('.task-card').map(c => c.dataset.id);
       reindexAfterDrag(visibleIds);
       persistTasks();
+    });
+  });
+}
+
+/**
+ * Moves `dragEl` to its new slot and animates every displaced sibling to
+ * its new position with a FLIP transition (First-Last-Invert-Play) so
+ * cards glide out of the way instead of snapping instantly — that instant
+ * snap, re-triggered on every mouse-move frame, is what read as
+ * "flickering" during drag.
+ */
+function reorderWithFlip(dragEl, afterEl){
+  const siblings = [...taskListEl.children].filter(c => c.classList.contains('task-card') && c !== dragEl);
+  const firstRects = siblings.map(c => [c, c.getBoundingClientRect()]);
+
+  if (afterEl == null) taskListEl.appendChild(dragEl);
+  else taskListEl.insertBefore(dragEl, afterEl);
+
+  const toAnimate = [];
+  firstRects.forEach(([c, first]) => {
+    const last = c.getBoundingClientRect();
+    const dy = first.top - last.top;
+    if (Math.abs(dy) < 0.5) return;
+    c.style.transition = 'none';
+    c.style.transform = `translateY(${dy}px)`;
+    toAnimate.push(c);
+  });
+  if (!toAnimate.length) return;
+
+  // Force layout so the instant "jump" above is committed before it's
+  // released on the next frame — without this the browser can coalesce
+  // both transform writes into one and skip the animation entirely.
+  void taskListEl.offsetHeight;
+
+  requestAnimationFrame(() => {
+    toAnimate.forEach(c => {
+      c.style.transition = '';
+      c.style.transform = '';
     });
   });
 }
@@ -357,12 +405,6 @@ export function initTaskForm(){
     $('#notesInput').value = '';
     $('#dueDateInput').value = '';
     taskInput.focus();
-  });
-
-  $('#expandAddBtn').addEventListener('click', () => {
-    const willShow = addExtra.hidden;
-    addExtra.hidden = !addExtra.hidden;
-    $('#expandAddBtn').setAttribute('aria-expanded', String(willShow));
   });
 }
 

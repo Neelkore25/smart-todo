@@ -30,7 +30,7 @@
 }
 
 /* ---------- Toolbar ---------- */
-.toolbar{ display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; padding: var(--space-3); }
+.toolbar{ display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; padding: var(--space-3); position: relative; z-index: 30; }
 .search-wrap{
   flex: 1; min-width: 170px; display: flex; align-items: center; gap: var(--space-2);
   background: var(--glass); border: 1px solid var(--border); border-radius: var(--r-sm);
@@ -121,7 +121,6 @@ select:focus-visible{ border-color: var(--accent); }
   border-left: 3px solid var(--priority-low);
   transition: transform var(--dur-base) var(--ease), opacity var(--dur-base) var(--ease),
               box-shadow var(--dur-base) ease, border-color var(--dur-base) ease, background var(--dur-base) ease;
-  cursor: grab;
   animation: cardIn .3s var(--ease);
 }
 .task-card:hover{
@@ -152,7 +151,15 @@ select:focus-visible{ border-color: var(--accent); }
 .task-card.leaving{ opacity: 0; transform: translateX(24px) scale(.97); }
 @keyframes cardIn{ from{ opacity: 0; transform: translateY(6px) scale(.99); } to{ opacity: 1; transform: none; } }
 
-.drag-handle{ color: var(--text-3); padding-top: 3px; flex-shrink: 0; cursor: grab; transition: color var(--dur-base) ease; }
+.drag-handle{
+  color: var(--text-3); padding-top: 3px; flex-shrink: 0; transition: color var(--dur-base) ease;
+  /* A self-contained cursor icon (opaque white badge + dark dots) rather
+     than the bare `grab` keyword — the OS's own grab-hand glyph can have
+     poor contrast on dark surfaces depending on the user's cursor theme.
+     Baking our own contrast into the image guarantees visibility on any
+     background, in any theme, regardless of OS cursor settings. */
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2224%22 height=%2224%22 viewBox=%220 0 24 24%22><circle cx=%2212%22 cy=%2212%22 r=%2210%22 fill=%22white%22 stroke=%22black%22 stroke-width=%221.4%22/><circle cx=%229%22 cy=%228%22 r=%221.3%22 fill=%22black%22/><circle cx=%229%22 cy=%2212%22 r=%221.3%22 fill=%22black%22/><circle cx=%229%22 cy=%2216%22 r=%221.3%22 fill=%22black%22/><circle cx=%2215%22 cy=%228%22 r=%221.3%22 fill=%22black%22/><circle cx=%2215%22 cy=%2212%22 r=%221.3%22 fill=%22black%22/><circle cx=%2215%22 cy=%2216%22 r=%221.3%22 fill=%22black%22/></svg>') 12 12, grab;
+}
 .task-card:hover .drag-handle{ color: var(--text-2); }
 .drag-handle svg{ width: 15px; height: 15px; }
 
@@ -217,13 +224,20 @@ select:focus-visible{ border-color: var(--accent); }
 /* ---------- Date filter popover ---------- */
 .date-filter-wrap{ position: relative; }
 .date-popover{
-  position: absolute; top: calc(100% + 8px); right: 0; z-index: 60;
+  /* left/top are set inline by js/calendar.js (fixed to the viewport) so
+     this can never end up trapped behind another section's stacking
+     context — see the comment in calendar.js for why. */
+  position: fixed; z-index: 500;
   padding: var(--space-4); width: 250px;
   background: var(--surface);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-lg);
   flex-direction: column; gap: var(--space-3);
+  animation: popoverIn .16s var(--ease-out);
 }
 .date-popover[hidden]{ display: none; }
 .date-popover:not([hidden]){ display: flex; }
+@keyframes popoverIn{ from{ opacity: 0; transform: translateY(-4px) scale(.98); } to{ opacity: 1; transform: none; } }
 .date-popover-row{ display: flex; gap: 6px; }
 .date-popover-row select{ flex: 1; min-width: 0; padding: 8px 6px; }
 .date-popover-actions{ display: flex; justify-content: flex-end; gap: var(--space-2); }

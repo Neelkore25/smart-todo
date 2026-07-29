@@ -36,11 +36,51 @@ export function initCalendar(onChange){
   const popover = $('#datePopover');
   const dpYear = $('#dpYear'), dpMonth = $('#dpMonth'), dpDay = $('#dpDay');
 
+  // Fixed-position + JS-computed coordinates instead of relying on
+  // `position: absolute` inside the toolbar's stacking context — that
+  // approach was fragile (any ancestor gaining a transform/filter/opacity
+  // stacking context, now or in a future edit, could trap the popover
+  // behind later sections again). Fixed positioning against the viewport
+  // sidesteps that class of bug entirely.
+  function positionPopover(){
+    const btnRect = toggleBtn.getBoundingClientRect();
+    const gap = 8;
+    const vw = window.innerWidth, vh = window.innerHeight;
+
+    popover.style.left = '0px';
+    popover.style.top = '0px';
+    const pw = popover.offsetWidth, ph = popover.offsetHeight;
+
+    let left = btnRect.right - pw;
+    let top = btnRect.bottom + gap;
+
+    left = Math.min(Math.max(left, 8), vw - pw - 8);
+    if (top + ph > vh - 8) top = btnRect.top - ph - gap; // flip above if no room below
+
+    popover.style.left = `${Math.round(left)}px`;
+    popover.style.top = `${Math.round(top)}px`;
+  }
+
+  function closeOnScroll(){ if (!popover.hidden) closePopover(); }
+  function closePopover(){
+    popover.hidden = true;
+    toggleBtn.setAttribute('aria-expanded', 'false');
+    window.removeEventListener('resize', positionPopover);
+    window.removeEventListener('scroll', closeOnScroll, true);
+  }
+
   toggleBtn.addEventListener('click', () => {
     const willShow = popover.hidden;
-    if (willShow) populateSelects();
-    popover.hidden = !willShow;
-    toggleBtn.setAttribute('aria-expanded', String(willShow));
+    if (willShow){
+      populateSelects();
+      popover.hidden = false;
+      positionPopover();
+      toggleBtn.setAttribute('aria-expanded', 'true');
+      window.addEventListener('resize', positionPopover);
+      window.addEventListener('scroll', closeOnScroll, true);
+    } else {
+      closePopover();
+    }
   });
 
   [dpYear, dpMonth].forEach(sel => sel.addEventListener('change', () => {
@@ -50,22 +90,21 @@ export function initCalendar(onChange){
   $('#dpOk').addEventListener('click', () => {
     const y = Number(dpYear.value), m = Number(dpMonth.value), d = Number(dpDay.value);
     state.calSelectedDate = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-    popover.hidden = true;
+    closePopover();
     toggleBtn.classList.add('active');
     onChange && onChange();
   });
 
   $('#dpClear').addEventListener('click', () => {
     state.calSelectedDate = null;
-    popover.hidden = true;
+    closePopover();
     toggleBtn.classList.remove('active');
     onChange && onChange();
   });
 
   document.addEventListener('click', (e) => {
     if (!popover.hidden && !popover.contains(e.target) && e.target !== toggleBtn && !toggleBtn.contains(e.target)){
-      popover.hidden = true;
-      toggleBtn.setAttribute('aria-expanded', 'false');
+      closePopover();
     }
   });
 }
