@@ -103,9 +103,68 @@ export async function decryptData(encryptedPayload, password) {
   }
 }
 
+// Key used to hand a just-entered password from login.html to index.html
+// for exactly one page load. Lives only in sessionStorage (cleared on
+// read, and gone entirely once the browser tab closes) — never persisted.
+const PENDING_UNLOCK_KEY = 'smarttodo.session.pendingUnlock';
+
 // Active session state
 let sessionPassword = null;
 let currentUser = safeStorage.get(USER_INFO_KEY, null);
+
+/**
+ * Called once on app start (see main.js). If login.html just verified a
+ * master password and redirected here, this picks it up, unlocks the
+ * vault, decrypts the saved tasks, and clears the handoff value so it's
+ * never reused or left lying around.
+ */
+export async function autoUnlockFromHandoff(onTasksUpdated) {
+  let pass = null;
+  try {
+    pass = sessionStorage.getItem(PENDING_UNLOCK_KEY);
+  } catch (e) { /* sessionStorage unavailable — nothing to hand off */ }
+  if (!pass) return;
+  try { sessionStorage.removeItem(PENDING_UNLOCK_KEY); } catch (e) { /* ignore */ }
+
+  try {
+    const verifierPayload = safeStorage.get(VERIFIER_KEY, null);
+    if (!verifierPayload) return; // vault was reset between login.html and now
+    const check = await decryptData(verifierPayload, pass);
+    if (check.verifier !== 'SMART_TODO_VAULT_VALID') return;
+
+    sessionPassword = pass;
+    const encryptedTasks = safeStorage.get(ENCRYPTED_TASKS_KEY, null);
+    if (encryptedTasks) {
+      const decryptedTasks = await decryptData(encryptedTasks, pass);
+      if (Array.isArray(decryptedTasks)) {
+        state.tasks = decryptedTasks;
+        persistTasks();
+        onTasksUpdated && onTasksUpdated();
+      }
+    } else {
+      // Fresh vault created on login.html — encrypt whatever tasks
+      // already exist locally so the vault has something to protect.
+      const encrypted = await encryptData(state.tasks, pass);
+      safeStorage.set(ENCRYPTED_TASKS_KEY, encrypted);
+    }
+  } catch (err) {
+    // Wrong/stale password somehow — fail silently, badge just stays locked
+    // and the user can unlock manually from the topbar.
+  } finally {
+    updateAuthBadge();
+  }
+}
+
+/** Clears the local session (used by the "Log out" button) and sends the
+ * user back to the login gate. Does NOT delete the encrypted vault. */
+export function logOut() {
+  sessionPassword = null;
+  try {
+    sessionStorage.removeItem('smarttodo.session.entered');
+    sessionStorage.removeItem(PENDING_UNLOCK_KEY);
+  } catch (e) { /* ignore */ }
+  window.location.href = 'login.html';
+}
 
 export function getSessionPassword() {
   return sessionPassword;

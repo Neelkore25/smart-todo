@@ -7,6 +7,22 @@
 <meta name="description" content="A premium, glassmorphic task manager with priorities, categories, a calendar view, a Pomodoro timer, daily goals, and achievements." />
 <meta name="theme-color" id="themeColorMeta" content="#09090B" />
 <script>
+  /* GATE — runs before anything else. Sends the user to login.html
+     unless this browser tab already passed through it (either by
+     unlocking/creating a vault, or by choosing "Continue without an
+     account"). The flag lives only in sessionStorage, so it resets
+     each time the tab/browser is closed — the app doesn't force a
+     login every single page refresh within the same session. */
+  (function(){
+    var entered = false;
+    try { entered = sessionStorage.getItem('smarttodo.session.entered') === '1'; }
+    catch (e) { entered = true; } // if sessionStorage is blocked, don't hard-lock the app
+    if (!entered) {
+      window.location.replace('login.html');
+    }
+  })();
+</script>
+<script>
   /* Runs synchronously, before any CSS is applied, so the correct theme
      is already set on <html> at first paint — no flash of the wrong
      theme while the module scripts load. Mirrors the (tiny) logic in
@@ -62,6 +78,9 @@
     <div class="topbar-actions">
       <button id="authBadgeBtn" class="auth-badge-btn setup" type="button" title="Enable E2E Vault">
         <i data-lucide="key"></i> <span>Enable E2E Vault</span>
+      </button>
+      <button id="logoutBtn" class="icon-btn" title="Log out" aria-label="Log out">
+        <i data-lucide="log-out"></i>
       </button>
       <button id="themeToggle" class="icon-btn" title="Theme: auto" aria-label="Toggle theme">
         <i data-lucide="sun-moon"></i>

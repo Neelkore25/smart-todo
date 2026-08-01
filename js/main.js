@@ -9,7 +9,7 @@ import { initCalendar } from './calendar.js';
 import { initPomodoro, initDailyGoal, initVoiceInput, initSuggestions } from './features.js';
 import { initShortcuts } from './shortcuts.js';
 import { initTheme } from './theme.js';
-import { initAuth } from './auth.js';
+import { initAuth, autoUnlockFromHandoff, logOut } from './auth.js';
 
 window.paintIcons = paintIcons;
 
@@ -55,6 +55,9 @@ function init(){
   initSuggestions();
   initShortcuts();
   initAuth(renderList);
+  autoUnlockFromHandoff(renderList);
+  const logoutBtn = $('#logoutBtn');
+  if (logoutBtn) logoutBtn.addEventListener('click', logOut);
   initRipple();
   initLoader();
 
