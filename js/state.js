@@ -18,11 +18,35 @@ export function uid() {
   return id;
 }
 
+/* Defensive task loader & migration */
+function loadAndMigrateTasks() {
+  const rawTasks = safeStorage.get(TASKS_KEY, []);
+  if (!Array.isArray(rawTasks)) return [];
+
+  return rawTasks.map(t => {
+    let safeDoneAt = null;
+    if (t && t.doneAt) {
+      if (typeof t.doneAt === 'string') {
+        safeDoneAt = t.doneAt;
+      } else if (typeof t.doneAt === 'number') {
+        try {
+          safeDoneAt = new Date(t.doneAt).toISOString();
+        } catch (e) {
+          safeDoneAt = null;
+        }
+      }
+    }
+
+    return {
+      ...t,
+      doneAt: safeDoneAt,
+      subtasks: Array.isArray(t.subtasks) ? t.subtasks : []
+    };
+  });
+}
+
 export const state = {
-  tasks: safeStorage.get(TASKS_KEY, []).map(t => ({
-    ...t,
-    subtasks: Array.isArray(t.subtasks) ? t.subtasks : []
-  })),
+  tasks: loadAndMigrateTasks(),
   filter: 'all',
   categoryFilter: 'all',
   searchQuery: '',

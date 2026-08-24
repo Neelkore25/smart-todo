@@ -5,7 +5,7 @@ import { toast } from './toast.js';
 
 /* Safe helper for checking doneAt date string */
 function getDoneAtString(t) {
-  if (!t.doneAt) return '';
+  if (!t || !t.doneAt) return '';
   if (typeof t.doneAt === 'string') return t.doneAt;
   if (typeof t.doneAt === 'number') {
     try {
@@ -110,7 +110,7 @@ export function initDailyGoal() {
 
   function updateGoalUI() {
     const todayStr = todayISO();
-    const todayDone = state.tasks.filter(t => t.done && getDoneAtString(t).startsWith(todayStr)).length;
+    const todayDone = state.tasks.filter(t => t.done && typeof t.doneAt === 'string' && t.doneAt.startsWith(todayStr)).length;
     state.dailyGoal.count = todayDone;
     persistGoal();
 
