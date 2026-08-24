@@ -1,5 +1,5 @@
 /* ============================================================
-   ORBIT MAIN MODULE — Application entry point.
+   SMART-TODO MAIN MODULE — Pure JavaScript Application Entry Point.
    Wires all core modules, command palette, shortcuts, and initial render.
    ============================================================ */
 import { $ } from './dom.js';
