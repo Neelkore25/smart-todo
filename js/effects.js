@@ -1,111 +1,97 @@
-/* Audio Synthesis & Visual Effects Engine (Web Audio API & Confetti Burst) */
-import { safeStorage } from './storage.js';
+/* ============================================================
+   EFFECTS MODULE — Sound feedback & confetti celebrations.
+   Fixes two dead features: the "Audio & Toast Feedback" setting
+   toggle previously had zero effect, and the #confettiLayer
+   element in the DOM was never used by any code.
+   ============================================================ */
+import { $ } from './dom.js';
+import { getSetting } from './settings.js';
 
 let audioCtx = null;
-
-function getAudioContext() {
+function ctx() {
   if (!audioCtx) {
-    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    if (AudioContextClass) {
-      audioCtx = new AudioContextClass();
-    }
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return null;
+    audioCtx = new AC();
   }
-  if (audioCtx && audioCtx.state === 'suspended') {
-    audioCtx.resume();
-  }
+  if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
   return audioCtx;
 }
 
-export function playSound(type) {
-  try {
-    const soundEnabled = safeStorage.get('smarttodo.settings', {}).soundEnabled !== false;
-    if (!soundEnabled) return;
+/* Tiny, tasteful tones — never harsh, never long. Respects the
+   "Audio & Toast Feedback" setting in Preferences. */
+export function playSound(kind = 'tick') {
+  if (getSetting('soundEnabled') === false) return;
+  const c = ctx();
+  if (!c) return;
 
-    const ctx = getAudioContext();
-    if (!ctx) return;
+  const presets = {
+    complete: [{ f: 740, t: 0, d: 0.09 }, { f: 988, t: 0.07, d: 0.12 }],
+    reopen:   [{ f: 392, t: 0, d: 0.1 }],
+    delete:   [{ f: 300, t: 0, d: 0.08 }],
+    achievement: [{ f: 523, t: 0, d: 0.09 }, { f: 659, t: 0.08, d: 0.09 }, { f: 784, t: 0.16, d: 0.18 }],
+    goal: [{ f: 587, t: 0, d: 0.1 }, { f: 880, t: 0.09, d: 0.16 }],
+    tick: [{ f: 620, t: 0, d: 0.05 }]
+  };
+  const notes = presets[kind] || presets.tick;
 
-    const now = ctx.currentTime;
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-
-    if (type === 'complete') {
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(523.25, now); // C5
-      osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.12); // G5
-      gain.gain.setValueAtTime(0.15, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.20);
-      osc.start(now);
-      osc.stop(now + 0.20);
-    } else if (type === 'reopen') {
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(440, now);
-      osc.frequency.exponentialRampToValueAtTime(330, now + 0.12);
-      gain.gain.setValueAtTime(0.12, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
-      osc.start(now);
-      osc.stop(now + 0.18);
-    } else if (type === 'delete') {
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(220, now);
-      osc.frequency.exponentialRampToValueAtTime(110, now + 0.15);
-      gain.gain.setValueAtTime(0.15, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
-      osc.start(now);
-      osc.stop(now + 0.15);
-    } else if (type === 'goal' || type === 'achievement') {
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(523.25, now); // C5
-      osc.frequency.setValueAtTime(659.25, now + 0.10); // E5
-      osc.frequency.setValueAtTime(783.99, now + 0.20); // G5
-      osc.frequency.setValueAtTime(1046.50, now + 0.30); // C6
-      gain.gain.setValueAtTime(0.18, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
-      osc.start(now);
-      osc.stop(now + 0.45);
-    }
-  } catch (e) {
-    // Silent fallback if audio is blocked
-  }
+  notes.forEach(n => {
+    const osc = c.createOscillator();
+    const gain = c.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = n.f;
+    const start = c.currentTime + n.t;
+    gain.gain.setValueAtTime(0, start);
+    gain.gain.linearRampToValueAtTime(0.11, start + 0.015);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + n.d);
+    osc.connect(gain).connect(c.destination);
+    osc.start(start);
+    osc.stop(start + n.d + 0.02);
+  });
 }
 
-export function fireConfetti(targetEl, options = {}) {
-  const count = options.count || 24;
-  const container = document.getElementById('confettiLayer') || document.body;
+const CONFETTI_COLORS = ['#00D4FF', '#0088FF', '#34D399', '#FBBF24', '#F87171', '#A78BFA'];
 
-  let originX = window.innerWidth / 2;
-  let originY = window.innerHeight / 2;
+/* Fires a burst of small DOM particles from a given origin point (or the
+   center of the viewport if omitted). Deliberately lightweight — no
+   canvas, no external libs — and respects prefers-reduced-motion. */
+export function fireConfetti(originEl, opts = {}) {
+  const layer = $('#confettiLayer');
+  if (!layer) return;
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-  if (targetEl && targetEl.getBoundingClientRect) {
-    const rect = targetEl.getBoundingClientRect();
-    originX = rect.left + rect.width / 2;
-    originY = rect.top + rect.height / 2;
+  let x = window.innerWidth / 2;
+  let y = window.innerHeight / 2;
+  if (originEl && originEl.getBoundingClientRect) {
+    const r = originEl.getBoundingClientRect();
+    x = r.left + r.width / 2;
+    y = r.top + r.height / 2;
   }
 
-  const colors = ['#00D4FF', '#38BDF8', '#34D399', '#FBBF24', '#A855F7', '#EC4899'];
-
+  const count = opts.count || 22;
   for (let i = 0; i < count; i++) {
-    const piece = document.createElement('div');
-    piece.className = 'confetti-piece';
+    const p = document.createElement('span');
+    p.className = 'confetti-piece';
+    const angle = (Math.random() * Math.PI * 2);
+    const dist = 60 + Math.random() * 120;
+    const dx = Math.cos(angle) * dist;
+    const dy = Math.sin(angle) * dist - 40;
+    const rot = (Math.random() * 720 - 360) + 'deg';
+    const color = CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)];
+    const size = 5 + Math.random() * 5;
 
-    const color = colors[Math.floor(Math.random() * colors.length)];
-    const size = Math.floor(Math.random() * 6) + 6;
-    const dx = (Math.random() - 0.5) * 220;
-    const dy = (Math.random() - 0.7) * 180;
-    const rot = (Math.random() - 0.5) * 720;
+    p.style.left = x + 'px';
+    p.style.top = y + 'px';
+    p.style.width = size + 'px';
+    p.style.height = size * (Math.random() > 0.5 ? 1 : 2.2) + 'px';
+    p.style.background = color;
+    p.style.setProperty('--dx', dx + 'px');
+    p.style.setProperty('--dy', dy + 'px');
+    p.style.setProperty('--rot', rot);
+    p.style.animationDelay = (Math.random() * 0.05) + 's';
 
-    piece.style.left = originX + 'px';
-    piece.style.top = originY + 'px';
-    piece.style.width = size + 'px';
-    piece.style.height = size + 'px';
-    piece.style.backgroundColor = color;
-    piece.style.setProperty('--dx', dx + 'px');
-    piece.style.setProperty('--dy', dy + 'px');
-    piece.style.setProperty('--rot', rot + 'deg');
-
-    container.appendChild(piece);
-    setTimeout(() => piece.remove(), 1000);
+    layer.appendChild(p);
+    p.addEventListener('animationend', () => p.remove());
+    setTimeout(() => p.remove(), 1400);
   }
 }
