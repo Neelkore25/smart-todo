@@ -25,8 +25,7 @@ export function initCommandPalette(onRenderTasks) {
     { id: 'theme-dark', label: 'Switch to Dark Mode', category: 'Appearance', icon: 'moon', action: () => { setTheme('dark'); toast('Theme: Dark', { icon: 'moon' }); } },
     { id: 'theme-light', label: 'Switch to Light Mode', category: 'Appearance', icon: 'sun', action: () => { setTheme('light'); toast('Theme: Light', { icon: 'sun' }); } },
     { id: 'theme-auto', label: 'Switch to System Auto Theme', category: 'Appearance', icon: 'sun-moon', action: () => { setTheme('auto'); toast('Theme: Auto', { icon: 'sun-moon' }); } },
-    { id: 'open-settings', label: 'Open App Preferences / Settings', category: 'Preferences', icon: 'settings', action: () => { $('#settingsToggleBtn').click(); } },
-    { id: 'open-vault', label: 'Open E2E Encrypted Vault', category: 'Security', icon: 'key', action: () => { $('#authBadgeBtn').click(); } }
+    { id: 'open-settings', label: 'Open App Preferences / Settings', category: 'Preferences', icon: 'settings', action: () => { $('#settingsToggleBtn').click(); } }
   ];
 
   function triggerFilter(filter) {

@@ -21,11 +21,24 @@ export function initCalendar(onDateSelected) {
 
   if (!toggleBtn || !popover) return;
 
+  // Always sync calendar view to current system month and year on boot
+  const now = new Date();
+  state.calViewYear = now.getFullYear();
+  state.calViewMonth = now.getMonth();
+
   function togglePopover() {
     const isHidden = popover.hidden;
     popover.hidden = !isHidden;
     toggleBtn.setAttribute('aria-expanded', String(isHidden));
-    if (isHidden) renderGrid();
+    if (isHidden) {
+      // Re-sync to current date when opening if no date filter active
+      if (!state.calSelectedDate) {
+        const currentDate = new Date();
+        state.calViewYear = currentDate.getFullYear();
+        state.calViewMonth = currentDate.getMonth();
+      }
+      renderGrid();
+    }
   }
 
   toggleBtn.addEventListener('click', (e) => {
@@ -152,4 +165,7 @@ export function initCalendar(onDateSelected) {
       });
     });
   }
+
+  // Initial grid render
+  renderGrid();
 }

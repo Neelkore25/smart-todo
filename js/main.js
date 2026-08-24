@@ -10,7 +10,6 @@ import { initPomodoro, initDailyGoal, initVoiceInput, initSuggestions } from './
 import { initShortcuts } from './shortcuts.js';
 import { initTheme } from './theme.js';
 import { initSettings } from './settings.js';
-import { initAuth } from './auth.js';
 import { initCommandPalette } from './command-palette.js';
 
 window.paintIcons = paintIcons;
@@ -58,7 +57,6 @@ function init(){
   initSuggestions();
   initShortcuts();
   initSettings(renderList);
-  initAuth(renderList);
   initCommandPalette(renderList);
   initRipple();
   initLoader();

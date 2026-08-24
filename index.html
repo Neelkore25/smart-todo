@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Orbit — Intentional Task & Execution Workspace</title>
-<meta name="description" content="Orbit is a SaaS-quality productivity workspace featuring command palette, priority matrix, visual calendar grid, Pomodoro focus timer, daily goal tracking, and client-side E2E encryption." />
+<meta name="description" content="Orbit is a SaaS-quality productivity workspace featuring command palette, priority matrix, visual calendar grid, Pomodoro focus timer, and daily goal tracking." />
 <meta name="theme-color" id="themeColorMeta" content="#08090D" />
 <script>
   /* Synchronous Theme Bootstrapper — Eliminates FOUC (flash of unstyled theme) */
@@ -61,9 +61,6 @@
         <span>Command</span>
         <kbd>⌘K</kbd>
       </button>
-      <button id="authBadgeBtn" class="auth-badge-btn setup" type="button" title="E2E Encrypted Vault">
-        <i data-lucide="key"></i> <span>E2E Vault</span>
-      </button>
       <button id="settingsToggleBtn" class="icon-btn" title="Settings" aria-label="Open settings">
         <i data-lucide="settings"></i>
       </button>
@@ -118,7 +115,7 @@
         <div class="date-popover glass" id="datePopover" hidden>
           <div class="date-popover-header">
             <button type="button" class="cal-nav-btn" id="calPrevMonth" title="Previous month"><i data-lucide="chevron-left"></i></button>
-            <span class="popover-title" id="calMonthYearLabel">August 2026</span>
+            <span class="popover-title" id="calMonthYearLabel"></span>
             <button type="button" class="cal-nav-btn" id="calNextMonth" title="Next month"><i data-lucide="chevron-right"></i></button>
           </div>
           <div class="date-presets">
@@ -245,36 +242,6 @@
       <span><b>↵</b> select</span>
       <span><b>esc</b> close</span>
     </div>
-  </div>
-</div>
-
-<!-- ============ E2E AUTH MODAL ============ -->
-<div class="modal-backdrop" id="authModal" hidden>
-  <div class="auth-modal-card glass">
-    <button class="modal-close-btn" id="closeAuthModal" aria-label="Close modal"><i data-lucide="x"></i></button>
-    <div class="auth-modal-header">
-      <div class="auth-icon-badge"><i data-lucide="shield-check"></i></div>
-      <h2 id="authModalTitle">E2E Encrypted Vault</h2>
-      <p id="authModalSubtitle">Secure your tasks with AES-256-GCM zero-knowledge encryption.</p>
-    </div>
-    <form id="authForm">
-      <div class="form-group" id="usernameGroup">
-        <label for="authUsername">Vault Username / Name</label>
-        <input type="text" id="authUsername" placeholder="e.g. Neel" maxlength="30" />
-      </div>
-      <div class="form-group">
-        <label for="authPassword">Master Password</label>
-        <input type="password" id="authPassword" placeholder="Enter master password..." required minlength="4" />
-      </div>
-      <div class="auth-security-badge">
-        <i data-lucide="lock"></i> <span>AES-256-GCM · PBKDF2 (100k iterations) · Client-side only</span>
-      </div>
-      <div class="auth-modal-actions">
-        <button type="submit" class="btn-primary full-width" id="authSubmitBtn">Unlock Vault</button>
-        <button type="button" class="btn-text" id="toggleAuthMode">Create New Vault / Reset</button>
-        <button type="button" class="btn-danger-soft" id="lockVaultBtn" hidden>Lock Vault Now</button>
-      </div>
-    </form>
   </div>
 </div>
 

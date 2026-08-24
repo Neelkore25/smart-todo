@@ -1,6 +1,6 @@
 # Orbit — The Intentional Task & Execution Workspace
 
-**Orbit** is a SaaS-quality productivity workspace engineered for speed, focus, and execution. Inspired by the design standards of Linear, Raycast, Vercel, Apple, and Notion, Orbit combines a fast task engine, interactive command palette, visual monthly calendar, focus session timer, and client-side E2E zero-knowledge encryption into a modern, local-first web app.
+**Orbit** is a SaaS-quality productivity workspace engineered for speed, focus, and execution. Inspired by the design standards of Linear, Raycast, Vercel, Apple, and Notion, Orbit combines a fast task engine, interactive command palette, visual monthly calendar, focus session timer, and daily goal ring into a modern, local-first web app.
 
 🌐 **Live Website:** [https://neelkore25.github.io/smart-todo/](https://neelkore25.github.io/smart-todo/)
 
@@ -9,7 +9,7 @@
 ## ⚡ Key Highlights & Capabilities
 
 - **Interactive Command Palette (`⌘K` / `Ctrl+K`)** — Power-user keyboard launcher to instantly search tasks, trigger actions, filter views, and switch themes.
-- **Local-First & E2E Privacy** — 100% client-side task storage using `localStorage` with optional AES-256-GCM zero-knowledge encrypted vault.
+- **Local-First & Fast** — 100% client-side task storage using `localStorage`. Instant load with zero login friction.
 - **Precision Task Engine** — Inline double-click task editing, recurring schedules (daily/weekly), priority tagging (High, Med, Low), and category filtering.
 - **Pointer Events Drag & Drop** — Smooth 60fps drag-and-drop task reordering across desktop and touch devices.
 - **Visual Monthly Calendar Grid** — Complete monthly calendar grid date filter with today marker, date presets, and task due indicators.
