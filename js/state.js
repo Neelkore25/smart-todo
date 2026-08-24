@@ -19,7 +19,10 @@ export function uid() {
 }
 
 export const state = {
-  tasks: safeStorage.get(TASKS_KEY, []),
+  tasks: safeStorage.get(TASKS_KEY, []).map(t => ({
+    ...t,
+    subtasks: Array.isArray(t.subtasks) ? t.subtasks : []
+  })),
   filter: 'all',
   categoryFilter: 'all',
   searchQuery: '',
@@ -27,7 +30,8 @@ export const state = {
   calSelectedDate: null,
   calViewYear: new Date().getFullYear(),
   calViewMonth: new Date().getMonth(),
-  dailyGoal: safeStorage.get(GOAL_KEY, { target: 3, date: todayISO(), count: 0 })
+  dailyGoal: safeStorage.get(GOAL_KEY, { target: 3, date: todayISO(), count: 0 }),
+  activeTaskForPomo: null
 };
 
 export function nextOrder() {

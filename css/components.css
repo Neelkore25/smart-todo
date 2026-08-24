@@ -1,5 +1,5 @@
 /* ==========================================================================
-   COMPONENTS — Theme-driven UI cards, command palette, custom controls & overlays
+   COMPONENTS — Theme-driven UI cards, subtasks, command palette, custom controls & overlays
    Every component consumes centralized CSS design tokens from tokens.css
    ========================================================================== */
 
@@ -129,7 +129,7 @@ select option {
 }
 @keyframes rippleAnim{ to{ transform: scale(3); opacity: 0; } }
 
-/* ---------- Task list ---------- */
+/* ---------- Task list & Subtasks ---------- */
 .task-list{ position: relative; list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--space-2); }
 
 .task-card{
@@ -184,7 +184,7 @@ body.compact-mode .task-card { padding: 10px 14px; }
 .drag-handle:active{ cursor: grabbing; }
 .drag-handle svg{ width: 14px; height: 14px; }
 
-/* ---------- Custom Checkbox ---------- */
+/* Custom Checkbox */
 .check-btn{
   width: 22px; height: 22px; border-radius: 6px;
   border: 2px solid var(--border-strong);
@@ -219,10 +219,47 @@ body.compact-mode .task-card { padding: 10px 14px; }
 }
 .badge.cat{ background: var(--accent-soft); color: var(--badge-cat-color); }
 .badge.due{ background: var(--accent-2-soft); color: var(--badge-due-color); }
+.badge.due.today{ background: rgba(56, 189, 248, 0.20); color: var(--accent-2); font-weight: 700; }
 .badge.due.overdue{ background: rgba(248, 113, 113, 0.16); color: var(--badge-overdue-color); }
+.badge.sub-badge{ background: var(--overlay-med); color: var(--text-2); }
 .badge svg{ width: 10px; height: 10px; }
 
 .task-meta{ display: flex; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-2); }
+
+/* ---------- Subtask Component Styles ---------- */
+.subtasks-container { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+.subtask-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; }
+.subtask-item {
+  display: flex; align-items: center; gap: 8px; padding: 4px 8px;
+  border-radius: 6px; background: var(--overlay-soft); border: 1px solid var(--border);
+  font-size: var(--fs-xs); color: var(--text-2); transition: all var(--dur-fast) ease;
+}
+.subtask-item.done { text-decoration: line-through; opacity: 0.65; }
+
+.subcheck-btn {
+  width: 16px; height: 16px; border-radius: 4px; border: 1px solid var(--border-strong);
+  background: transparent; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all var(--dur-fast) ease;
+}
+.subcheck-btn svg { width: 10px; height: 10px; stroke: #FFFFFF; opacity: 0; }
+.subtask-item.done .subcheck-btn { background: var(--success); border-color: var(--success); }
+.subtask-item.done .subcheck-btn svg { opacity: 1; }
+
+.subtask-text { flex: 1; min-width: 0; word-break: break-word; }
+.submini-btn {
+  border: none; background: transparent; color: var(--text-3); cursor: pointer; padding: 2px;
+  display: flex; align-items: center; justify-content: center; border-radius: 4px;
+}
+.submini-btn:hover { color: var(--danger); background: rgba(248, 113, 113, 0.16); }
+.submini-btn svg { width: 12px; height: 12px; }
+
+.add-subtask-form input {
+  width: 100%; border: 1px dashed var(--border); background: transparent;
+  color: var(--text-2); font-size: var(--fs-xs); padding: 5px 8px; border-radius: 6px;
+  outline: none; transition: border-color var(--dur-fast) ease;
+}
+.add-subtask-form input:focus { border-color: var(--accent); color: var(--text); }
+
 .task-notes{
   margin-top: var(--space-2); font-size: var(--fs-sm); color: var(--text-2);
   background: var(--notes-bg);
@@ -240,11 +277,6 @@ body.compact-mode .task-card { padding: 10px 14px; }
 .mini-btn:hover{ background: var(--overlay-med); color: var(--text); }
 .mini-btn.danger:hover{ color: var(--danger); background: rgba(248, 113, 113, 0.16); }
 .mini-btn svg{ width: 14px; height: 14px; }
-
-.confirm-delete{ display: flex; align-items: center; gap: var(--space-2); font-size: var(--fs-xs); color: var(--text-2); animation: cardIn .18s var(--ease); white-space: nowrap; }
-.confirm-delete button{ border: none; padding: 6px 11px; border-radius: 6px; font-size: .72rem; font-weight: 700; cursor: pointer; }
-.confirm-delete .yes{ background: var(--danger); color: #FFFFFF; }
-.confirm-delete .no{ background: var(--overlay-med); color: var(--text); }
 
 /* ---------- Empty state ---------- */
 .empty-state{ text-align: center; padding: var(--space-8) var(--space-4); color: var(--text-2); animation: cardIn .35s var(--ease); }

@@ -1,9 +1,9 @@
 /* ============================================================
-   TASKS — list rendering, filtering/sorting, CRUD actions,
+   TASKS — list rendering, subtasks, filtering/sorting, CRUD actions,
    inline editing, pointer drag-and-drop, and import/export.
    ============================================================ */
 import { $, $$ } from './dom.js';
-import { state, uid, persistTasks, nextOrder } from './state.js';
+import { state, uid, persistTasks, nextOrder, todayISO } from './state.js';
 import { paintIcons } from './icons.js';
 import { toast } from './toast.js';
 import { renderStats, isOverdue } from './stats.js';
@@ -45,16 +45,56 @@ function getFilteredSortedTasks(){
 }
 
 function escapeHtml(str){
-  return str.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  return str ? str.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])) : '';
 }
 
 function catIcon(cat){
   return { Work: 'briefcase', Personal: 'user', Study: 'book-open', Health: 'heart-pulse', Other: 'tag' }[cat] || 'tag';
 }
 
+function getDueBadgeHTML(t) {
+  if (!t.due) return '';
+  const today = todayISO();
+  const tomDate = new Date();
+  tomDate.setDate(tomDate.getDate() + 1);
+  const tomStr = tomDate.getFullYear() + '-' + String(tomDate.getMonth() + 1).padStart(2, '0') + '-' + String(tomDate.getDate()).padStart(2, '0');
+
+  let label = new Date(t.due + 'T00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  let isOver = isOverdue(t);
+  let isToday = t.due === today;
+  let isTom = t.due === tomStr;
+
+  let badgeClass = 'badge due';
+  if (isOver) {
+    badgeClass += ' overdue';
+    label = 'Overdue · ' + label;
+  } else if (isToday) {
+    badgeClass += ' today';
+    label = 'Due Today';
+  } else if (isTom) {
+    label = 'Due Tomorrow';
+  }
+
+  return `<span class="${badgeClass}"><i data-lucide="calendar"></i>${label}</span>`;
+}
+
+function subtaskHTML(st, taskId) {
+  return `
+    <li class="subtask-item ${st.done ? 'done' : ''}" data-subid="${st.id}">
+      <button class="subcheck-btn" data-action="toggle-subtask" aria-label="Toggle subtask">
+        <svg viewBox="0 0 24 24"><path d="M4 12 L10 17.5 L20 5.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <span class="subtask-text">${escapeHtml(st.text)}</span>
+      <button class="submini-btn" data-action="delete-subtask" aria-label="Delete subtask"><i data-lucide="x"></i></button>
+    </li>
+  `;
+}
+
 function taskCardHTML(t){
-  const overdue = isOverdue(t);
-  const dueLabel = t.due ? new Date(t.due + 'T00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '';
+  const subtasks = Array.isArray(t.subtasks) ? t.subtasks : [];
+  const doneSubCount = subtasks.filter(s => s.done).length;
+  const totalSubCount = subtasks.length;
+
   return `
   <li class="task-card priority-${t.priority} ${t.done ? 'done' : ''}" data-id="${t.id}">
     <span class="drag-handle" title="Drag to reorder" data-action="drag"><i data-lucide="grip-vertical"></i></span>
@@ -68,11 +108,23 @@ function taskCardHTML(t){
       </div>
       <div class="task-meta">
         <span class="badge cat"><i data-lucide="${catIcon(t.category)}"></i>${t.category}</span>
-        ${dueLabel ? `<span class="badge due ${overdue ? 'overdue' : ''}"><i data-lucide="calendar"></i>${overdue ? 'Overdue · ' : ''}${dueLabel}</span>` : ''}
+        ${getDueBadgeHTML(t)}
+        ${totalSubCount > 0 ? `<span class="badge sub-badge"><i data-lucide="check-square"></i>${doneSubCount}/${totalSubCount} subtasks</span>` : ''}
       </div>
+
+      <!-- Subtasks Container -->
+      <div class="subtasks-container" id="subtasks-${t.id}">
+        <ul class="subtask-list">${subtasks.map(s => subtaskHTML(s, t.id)).join('')}</ul>
+        <form class="add-subtask-form" data-taskid="${t.id}">
+          <input type="text" placeholder="+ Add subtask (press Enter)" maxlength="120" />
+        </form>
+      </div>
+
       ${t.notes ? `<div class="task-notes" id="notes-${t.id}">${escapeHtml(t.notes)}</div>` : ''}
     </div>
+
     <div class="task-actions" data-role="actions">
+      <button class="mini-btn" data-action="pomo" title="Focus session for this task" aria-label="Start focus session"><i data-lucide="timer"></i></button>
       ${t.notes ? `<button class="mini-btn" data-action="notes" aria-label="Toggle notes"><i data-lucide="sticky-note"></i></button>` : ''}
       <button class="mini-btn danger" data-action="delete" aria-label="Delete task"><i data-lucide="trash-2"></i></button>
     </div>
@@ -102,6 +154,7 @@ export function renderList(){
   }
   paintIcons();
   bindDragAndDrop();
+  bindSubtaskForms();
   renderStats();
 }
 
@@ -115,6 +168,7 @@ export function addTask(data){
     category: data.category || 'Other',
     due: data.due || '',
     recurring: data.recurring || 'none',
+    subtasks: [],
     done: false, doneAt: null,
     createdAt: Date.now(),
     order: nextOrder()
@@ -162,12 +216,59 @@ export function updateTaskText(id, newText){
   renderList();
 }
 
+/* ---------- Subtask Management ---------- */
+function bindSubtaskForms() {
+  $$('.add-subtask-form').forEach(form => {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const taskId = form.dataset.taskid;
+      const input = form.querySelector('input');
+      if (!input) return;
+      const text = input.value.trim();
+      if (!text) return;
+
+      const t = state.tasks.find(x => x.id === taskId);
+      if (t) {
+        if (!Array.isArray(t.subtasks)) t.subtasks = [];
+        t.subtasks.push({ id: 'st_' + Date.now(), text, done: false });
+        persistTasks();
+        renderList();
+        toast('Subtask added', { icon: 'plus' });
+      }
+    });
+  });
+}
+
 /* ---------- Task List Event Delegation ---------- */
 if (taskListEl) {
   taskListEl.addEventListener('click', (e) => {
     const card = e.target.closest('.task-card');
     if (!card) return;
     const id = card.dataset.id;
+    const t = state.tasks.find(x => x.id === id);
+
+    // Subtask click delegation
+    const subItem = e.target.closest('.subtask-item');
+    if (subItem && t) {
+      const subId = subItem.dataset.subid;
+      const sub = t.subtasks.find(s => s.id === subId);
+
+      if (e.target.closest('[data-action="toggle-subtask"]')) {
+        if (sub) {
+          sub.done = !sub.done;
+          persistTasks();
+          renderList();
+        }
+        return;
+      }
+      if (e.target.closest('[data-action="delete-subtask"]')) {
+        t.subtasks = t.subtasks.filter(s => s.id !== subId);
+        persistTasks();
+        renderList();
+        return;
+      }
+    }
+
     const actionBtn = e.target.closest('[data-action]');
     if (!actionBtn) return;
 
@@ -177,6 +278,11 @@ if (taskListEl) {
     else if (act === 'notes') {
       const notesEl = $('#notes-' + id, card);
       if (notesEl) notesEl.classList.toggle('open');
+    } else if (act === 'pomo') {
+      state.activeTaskForPomo = t;
+      const pomoModeLabel = $('#pomoMode');
+      if (pomoModeLabel) pomoModeLabel.textContent = `Focusing on: ${t.text}`;
+      toast(`Linked Pomodoro timer to "${t.text.slice(0, 20)}..."`, { icon: 'timer' });
     }
   });
 
@@ -291,7 +397,7 @@ export function initExportImport() {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state.tasks, null, 2));
       const a = document.createElement('a');
       a.href = dataStr;
-      a.download = `orbit_tasks_${new Date().toISOString().slice(0, 10)}.json`;
+      a.download = `smart_todo_tasks_${new Date().toISOString().slice(0, 10)}.json`;
       a.click();
       toast('Tasks exported to JSON', { icon: 'download' });
     });
@@ -377,7 +483,6 @@ function bindDragAndDrop() {
         placeholder.parentNode.insertBefore(card, placeholder);
         placeholder.remove();
 
-        // Update orders in state
         const updatedCards = $$('.task-card', taskListEl);
         updatedCards.forEach((el, index) => {
           const id = el.dataset.id;

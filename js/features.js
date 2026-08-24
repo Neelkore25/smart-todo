@@ -21,6 +21,14 @@ export function initPomodoro() {
     const m = String(Math.floor(pomoSeconds / 60)).padStart(2, '0');
     const s = String(pomoSeconds % 60).padStart(2, '0');
     display.textContent = `${m}:${s}`;
+
+    if (modeLabel) {
+      if (state.activeTaskForPomo) {
+        modeLabel.textContent = `${pomoModeState === 'focus' ? 'Focusing on:' : 'Break for:'} ${state.activeTaskForPomo.text}`;
+      } else {
+        modeLabel.textContent = pomoModeState === 'focus' ? 'Focus session (25m)' : 'Break session (5m)';
+      }
+    }
   }
 
   function tick() {
@@ -34,12 +42,10 @@ export function initPomodoro() {
       if (pomoModeState === 'focus') {
         pomoModeState = 'break';
         pomoSeconds = 5 * 60;
-        modeLabel.textContent = 'Break session';
         toast('Focus session completed! Take a 5-minute break.', { icon: 'award' });
       } else {
         pomoModeState = 'focus';
         pomoSeconds = 25 * 60;
-        modeLabel.textContent = 'Focus session';
         toast('Break finished! Ready for another focus session?', { icon: 'zap' });
       }
       updateDisplay();
@@ -64,11 +70,13 @@ export function initPomodoro() {
       pomoRunning = false;
       pomoModeState = 'focus';
       pomoSeconds = 25 * 60;
+      state.activeTaskForPomo = null;
       startBtn.textContent = 'Start';
-      modeLabel.textContent = 'Focus session';
       updateDisplay();
     });
   }
+
+  updateDisplay();
 }
 
 /* ---------- Daily Goal Ring Tracker ---------- */
