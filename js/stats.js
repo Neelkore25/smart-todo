@@ -2,6 +2,10 @@
 import { $ } from './dom.js';
 import { state, todayISO } from './state.js';
 import { ICONS } from './icons.js';
+import { safeStorage } from './storage.js';
+import { playSound, fireConfetti } from './effects.js';
+
+const UNLOCKED_KEY = 'smarttodo.unlockedBadges';
 
 function getDoneAtString(t) {
   if (!t.doneAt) return '';
@@ -14,6 +18,28 @@ function getDoneAtString(t) {
     }
   }
   return String(t.doneAt);
+}
+
+function toDateKey(d) {
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+/* Real "current streak": walks backward day by day from today, counting
+   consecutive days that had at least one completed task. If nothing was
+   completed today yet, the streak can still continue from yesterday so an
+   in-progress day doesn't zero it out prematurely. */
+function computeConsecutiveStreak(dateSet) {
+  if (!dateSet || dateSet.size === 0) return 0;
+  const cursor = new Date();
+  if (!dateSet.has(toDateKey(cursor))) {
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  let streak = 0;
+  while (dateSet.has(toDateKey(cursor))) {
+    streak++;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  return streak;
 }
 
 export function isOverdue(t) {
@@ -77,8 +103,9 @@ function renderStreakWidget() {
     }
   });
 
-  const streak = dates.size > 0 ? dates.size : 1;
-  streakDaysEl.textContent = `${streak} day${streak === 1 ? '' : 's'}`;
+  const streak = computeConsecutiveStreak(dates);
+  streakDaysEl.textContent = streak > 0 ? `${streak} day${streak === 1 ? '' : 's'}` : '0 days';
+  streakDaysEl.closest('.streak-box')?.classList.toggle('streak-hot', streak >= 3);
 }
 
 function renderAchievements(doneCount) {
@@ -92,16 +119,34 @@ function renderAchievements(doneCount) {
     { id: 'master', title: 'Task Master', desc: 'Complete 25 tasks', icon: 'trophy', min: 25 }
   ];
 
+  let firstRun = false;
+  try { firstRun = localStorage.getItem(UNLOCKED_KEY) === null; } catch (e) {}
+
+  const previouslyUnlocked = new Set(safeStorage.get(UNLOCKED_KEY, []));
+  const newlyUnlocked = [];
+
   let html = '';
   BADGES.forEach(b => {
     const unlocked = doneCount >= b.min;
+    if (unlocked && !previouslyUnlocked.has(b.id)) newlyUnlocked.push(b);
+    if (unlocked) previouslyUnlocked.add(b.id);
+
     const iconSvg = ICONS[b.icon] ? `<svg viewBox="0 0 24 24">${ICONS[b.icon]}</svg>` : '';
     html += `
-      <div class="achievement ${unlocked ? 'unlocked' : ''}">
+      <div class="achievement ${unlocked ? 'unlocked' : ''}" data-badge="${b.id}">
         ${iconSvg}
         <span class="tip"><b>${b.title}</b><br/>${b.desc}</span>
       </div>
     `;
   });
   badgesRow.innerHTML = html;
+
+  if (newlyUnlocked.length > 0) {
+    safeStorage.set(UNLOCKED_KEY, [...previouslyUnlocked]);
+    if (!firstRun) newlyUnlocked.forEach(b => {
+      const el = badgesRow.querySelector(`[data-badge="${b.id}"]`);
+      fireConfetti(el, { count: 34 });
+      playSound('achievement');
+    });
+  }
 }

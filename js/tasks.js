@@ -8,6 +8,7 @@ import { paintIcons } from './icons.js';
 import { toast } from './toast.js';
 import { renderStats, isOverdue } from './stats.js';
 import { parseNaturalLanguage, autoSuggestCategory } from './smart-parser.js';
+import { playSound, fireConfetti } from './effects.js';
 
 const taskListEl = $('#taskList');
 const emptyStateEl = $('#emptyState');
@@ -30,12 +31,14 @@ function getFilteredSortedTasks(){
         return false;
       }
     }
-    if (state.searchQuery && !t.text.toLowerCase().includes(state.searchQuery.toLowerCase())) return false;
+    const text = t.text || '';
+    if (state.searchQuery && !text.toLowerCase().includes(state.searchQuery.toLowerCase())) return false;
     return true;
   });
 
   const copy = list.slice();
   const today = todayISO();
+  const rank = (t) => priorityRank[t.priority] !== undefined ? priorityRank[t.priority] : priorityRank.med;
 
   switch (state.sortMode){
     case 'smart': // Focus Today: Overdue > Due Today > High Priority > Newest
@@ -48,17 +51,17 @@ function getFilteredSortedTasks(){
         const bToday = b.due === today ? 1 : 0;
         if (aToday !== bToday) return bToday - aToday;
 
-        const pDiff = priorityRank[a.priority] - priorityRank[b.priority];
+        const pDiff = rank(a) - rank(b);
         if (pDiff !== 0) return pDiff;
 
-        return b.createdAt - a.createdAt;
+        return (b.createdAt || 0) - (a.createdAt || 0);
       });
       break;
-    case 'oldest': copy.sort((a, b) => a.createdAt - b.createdAt); break;
-    case 'alpha': copy.sort((a, b) => a.text.localeCompare(b.text)); break;
-    case 'priority': copy.sort((a, b) => priorityRank[a.priority] - priorityRank[b.priority] || b.createdAt - a.createdAt); break;
+    case 'oldest': copy.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0)); break;
+    case 'alpha': copy.sort((a, b) => (a.text || '').localeCompare(b.text || '')); break;
+    case 'priority': copy.sort((a, b) => rank(a) - rank(b) || (b.createdAt || 0) - (a.createdAt || 0)); break;
     case 'manual': copy.sort((a, b) => (a.order || 0) - (b.order || 0)); break;
-    default: copy.sort((a, b) => b.createdAt - a.createdAt); // newest
+    default: copy.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)); // newest
   }
   return copy;
 }
@@ -197,17 +200,69 @@ export function addTask(data){
   toast('Task added', { icon: 'plus' });
 }
 
+function nextRecurringDate(dueStr, recurring) {
+  const base = dueStr ? new Date(dueStr + 'T00:00') : new Date();
+  if (recurring === 'weekly') base.setDate(base.getDate() + 7);
+  else base.setDate(base.getDate() + 1);
+  return base.getFullYear() + '-' + String(base.getMonth() + 1).padStart(2, '0') + '-' + String(base.getDate()).padStart(2, '0');
+}
+
 export function toggleTask(id){
   const t = state.tasks.find(x => x.id === id);
   if (!t) return;
   t.done = !t.done;
   t.doneAt = t.done ? new Date().toISOString() : null;
+
+  let spawned = null;
+  if (t.done && t.recurring && t.recurring !== 'none') {
+    spawned = {
+      id: uid(),
+      text: t.text,
+      notes: t.notes || '',
+      priority: t.priority,
+      category: t.category,
+      due: nextRecurringDate(t.due, t.recurring),
+      recurring: t.recurring,
+      subtasks: (t.subtasks || []).map(s => ({ ...s, done: false })),
+      done: false, doneAt: null,
+      createdAt: Date.now(),
+      order: nextOrder()
+    };
+    state.tasks.unshift(spawned);
+  }
+
   persistTasks();
   renderList();
-  toast(t.done ? 'Task completed' : 'Task reopened', {
-    icon: t.done ? 'check-circle' : 'circle',
-    undo: () => toggleTask(id)
-  });
+
+  if (t.done) {
+    playSound('complete');
+    const checkEl = document.querySelector(`.task-card[data-id="${id}"] .check-btn`);
+    fireConfetti(checkEl, { count: 14 });
+  } else {
+    playSound('reopen');
+  }
+
+  if (spawned) {
+    toast(`Task completed — next occurrence scheduled`, {
+      icon: 'repeat',
+      undo: () => {
+        toggleTask(id);
+        const idx = state.tasks.findIndex(x => x.id === spawned.id);
+        if (idx !== -1) state.tasks.splice(idx, 1);
+        persistTasks();
+        renderList();
+      }
+    });
+  } else {
+    toast(t.done ? 'Task completed' : 'Task reopened', {
+      icon: t.done ? 'check-circle' : 'circle',
+      undo: () => toggleTask(id)
+    });
+  }
+
+  if (t.done) {
+    document.dispatchEvent(new CustomEvent('task:completed', { detail: { task: t } }));
+  }
 }
 
 export function deleteTask(id){
@@ -216,6 +271,7 @@ export function deleteTask(id){
   const deleted = state.tasks.splice(idx, 1)[0];
   persistTasks();
   renderList();
+  playSound('delete');
   toast('Task deleted', {
     icon: 'trash-2',
     undo: () => {
@@ -336,15 +392,22 @@ export function initTaskForm() {
   const addExtra = $('#addExtra');
 
   if (expandBtn && addExtra) {
+    expandBtn.setAttribute('aria-expanded', 'false');
     expandBtn.addEventListener('click', () => {
-      addExtra.classList.toggle('hidden');
-      expandBtn.classList.toggle('active');
+      const nowHidden = addExtra.classList.toggle('hidden');
+      expandBtn.classList.toggle('active', !nowHidden);
+      expandBtn.setAttribute('aria-expanded', String(!nowHidden));
     });
   }
 
-  // Auto-suggest category as user types
+  let categoryManuallySet = false;
+  const categorySelectEl = $('#categorySelect');
+  if (categorySelectEl) {
+    categorySelectEl.addEventListener('change', () => { categoryManuallySet = true; });
+  }
   if (taskInput) {
     taskInput.addEventListener('input', (e) => {
+      if (categoryManuallySet) return;
       const val = e.target.value;
       const suggestedCat = autoSuggestCategory(val);
       const categorySelect = $('#categorySelect');
@@ -359,7 +422,6 @@ export function initTaskForm() {
     const rawVal = taskInput.value.trim();
     if (!rawVal) return;
 
-    // Natural Language Parsing
     const parsed = parseNaturalLanguage(rawVal);
 
     const priority = parsed.priority || $('#prioritySelect').value;
@@ -380,6 +442,7 @@ export function initTaskForm() {
     taskInput.value = '';
     $('#notesInput').value = '';
     $('#dueDateInput').value = '';
+    categoryManuallySet = false;
     taskInput.focus();
   });
 }
@@ -461,17 +524,39 @@ export function initExportImport() {
       reader.onload = (evt) => {
         try {
           const parsed = JSON.parse(evt.target.result);
-          if (Array.isArray(parsed)) {
-            state.tasks = parsed;
-            persistTasks();
-            renderList();
-            toast('Tasks imported successfully!', { icon: 'upload' });
-          } else {
-            throw new Error('Invalid format');
-          }
+          if (!Array.isArray(parsed)) throw new Error('Invalid format');
+
+          const sanitized = parsed
+            .filter(t => t && typeof t === 'object' && typeof t.text === 'string' && t.text.trim())
+            .map(t => ({
+              id: typeof t.id === 'string' ? t.id : uid(),
+              text: t.text.trim(),
+              notes: typeof t.notes === 'string' ? t.notes : '',
+              priority: ['low', 'med', 'high'].includes(t.priority) ? t.priority : 'med',
+              category: typeof t.category === 'string' ? t.category : 'Other',
+              due: typeof t.due === 'string' ? t.due : '',
+              recurring: ['none', 'daily', 'weekly'].includes(t.recurring) ? t.recurring : 'none',
+              subtasks: Array.isArray(t.subtasks) ? t.subtasks.filter(s => s && typeof s.text === 'string').map(s => ({ id: s.id || ('st_' + Date.now() + Math.random()), text: s.text, done: !!s.done })) : [],
+              done: !!t.done,
+              doneAt: typeof t.doneAt === 'string' ? t.doneAt : null,
+              createdAt: typeof t.createdAt === 'number' ? t.createdAt : Date.now(),
+              order: typeof t.order === 'number' ? t.order : nextOrder()
+            }));
+
+          if (sanitized.length === 0) throw new Error('No valid tasks found');
+
+          const hasExisting = state.tasks.length > 0;
+          const proceed = !hasExisting || confirm(`This will replace your current ${state.tasks.length} task(s) with ${sanitized.length} imported task(s). Continue?`);
+          if (!proceed) { importInput.value = ''; return; }
+
+          state.tasks = sanitized;
+          persistTasks();
+          renderList();
+          toast(`Imported ${sanitized.length} task(s) successfully!`, { icon: 'upload' });
         } catch (err) {
           toast('Failed to import JSON file.', { icon: 'alert-triangle' });
         }
+        importInput.value = '';
       };
       reader.readAsText(file);
     });
@@ -487,8 +572,9 @@ function bindDragAndDrop() {
     if (!handle) return;
 
     handle.addEventListener('pointerdown', (e) => {
-      if (e.button !== 0) return;
+      if (e.button !== 0 && e.pointerType === 'mouse') return;
       e.preventDefault();
+      try { handle.setPointerCapture(e.pointerId); } catch (err) {}
 
       card.classList.add('dragging-ghost');
       const rect = card.getBoundingClientRect();
