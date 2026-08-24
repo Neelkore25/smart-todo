@@ -1,5 +1,5 @@
 /* ==========================================================================
-   BASE — reset, global typography, ambient background, accessibility
+   BASE — Global Reset, Typography, Ambient Backdrops, Scrollbars
    ========================================================================== */
 *, *::before, *::after{ box-sizing: border-box; }
 html, body{ margin: 0; padding: 0; min-height: 100%; }
@@ -28,14 +28,14 @@ h1, h2, h3, .display{
 ::selection{ background: var(--accent); color: #FFFFFF; }
 ::-moz-selection{ background: var(--accent); color: #FFFFFF; }
 
-/* Slim, unobtrusive scrollbar */
+/* Custom unobtrusive scrollbar */
 ::-webkit-scrollbar{ width: 8px; height: 8px; }
 ::-webkit-scrollbar-track{ background: transparent; }
 ::-webkit-scrollbar-thumb{ background: var(--scrollbar-thumb); border-radius: 99px; border: 2px solid transparent; background-clip: padding-box; }
-::-webkit-scrollbar-thumb:hover{ background: rgba(255,255,255,0.25); background-clip: padding-box; }
+::-webkit-scrollbar-thumb:hover{ background: var(--border-strong); background-clip: padding-box; }
 *{ scrollbar-width: thin; scrollbar-color: var(--scrollbar-thumb) transparent; }
 
-/* Consistent focus ring */
+/* Accessible Focus States */
 :focus{ outline: none; }
 :focus-visible{
   outline: 2px solid var(--accent);
@@ -47,13 +47,13 @@ a{ color: var(--accent-2); }
 
 button, input, select, textarea{ font-family: inherit; }
 
-/* High-contrast typing cursor */
+/* Caret & input text color */
 input, textarea, [contenteditable="true"]{
   caret-color: var(--accent);
   color: var(--text);
 }
 
-/* Ambient background glows */
+/* Subtle Ambient Radial Backdrops */
 .ambient{
   position: fixed;
   inset: 0;
@@ -96,7 +96,7 @@ input, textarea, [contenteditable="true"]{
   50%{ transform: translate(-4%, -3%); }
 }
 
-/* ---------- Loader ---------- */
+/* Page Loading Screen */
 #loader{
   position: fixed; inset: 0; z-index: 999;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-4);

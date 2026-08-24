@@ -87,8 +87,8 @@ export function renderList(){
   emptyStateEl.hidden = !noneMatch;
   if (noneMatch){
     if (state.tasks.length === 0){
-      emptyTitleEl.textContent = 'All clear';
-      emptySubtitleEl.textContent = 'Add your first task above to get moving.';
+      emptyTitleEl.textContent = 'Nothing on your list yet';
+      emptySubtitleEl.textContent = 'Add a task above to get started.';
     } else if (state.searchQuery){
       emptyTitleEl.textContent = 'No matches';
       emptySubtitleEl.textContent = `Nothing found for "${state.searchQuery}".`;
