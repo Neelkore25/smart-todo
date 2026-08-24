@@ -14,6 +14,8 @@ const META = {
   dark: { icon: 'moon', title: 'Theme: dark' },
 };
 
+let currentThemeMode = 'auto';
+
 function apply(mode) {
   document.documentElement.setAttribute('data-theme', mode);
 
@@ -37,19 +39,33 @@ function apply(mode) {
 
   const meta = $('#themeColorMeta');
   if (meta) {
-    meta.setAttribute('content', isLight ? '#F3F3F7' : '#09090B');
+    meta.setAttribute('content', isLight ? '#F8FAFC' : '#080B10');
   }
+}
+
+export function getTheme() {
+  return currentThemeMode;
+}
+
+export function setTheme(mode) {
+  if (!ORDER.includes(mode)) mode = 'auto';
+  currentThemeMode = mode;
+  safeStorage.set('smarttodo.theme', mode);
+  apply(mode);
 }
 
 export function initTheme() {
   let mode = safeStorage.get('smarttodo.theme', 'auto');
   if (!ORDER.includes(mode)) mode = 'auto';
+  currentThemeMode = mode;
 
   apply(mode);
 
-  $('#themeToggle').addEventListener('click', () => {
-    mode = ORDER[(ORDER.indexOf(mode) + 1) % ORDER.length];
-    safeStorage.set('smarttodo.theme', mode);
-    apply(mode);
-  });
+  const toggleBtn = $('#themeToggle');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => {
+      const nextIndex = (ORDER.indexOf(currentThemeMode) + 1) % ORDER.length;
+      setTheme(ORDER[nextIndex]);
+    });
+  }
 }
