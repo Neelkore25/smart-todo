@@ -3,6 +3,19 @@ import { $ } from './dom.js';
 import { state, todayISO } from './state.js';
 import { ICONS } from './icons.js';
 
+function getDoneAtString(t) {
+  if (!t.doneAt) return '';
+  if (typeof t.doneAt === 'string') return t.doneAt;
+  if (typeof t.doneAt === 'number') {
+    try {
+      return new Date(t.doneAt).toISOString();
+    } catch(e) {
+      return '';
+    }
+  }
+  return String(t.doneAt);
+}
+
 export function isOverdue(t) {
   if (!t.due || t.done) return false;
   return t.due < todayISO();
@@ -41,23 +54,26 @@ function renderStreakWidget() {
 
   if (!streakDaysEl || !weekCompletedEl) return;
 
-  // Calculate tasks completed this week (last 7 days)
   const now = new Date();
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
   const weekDoneCount = state.tasks.filter(t => {
     if (!t.done || !t.doneAt) return false;
-    const d = new Date(t.doneAt);
+    const str = getDoneAtString(t);
+    if (!str) return false;
+    const d = new Date(str);
     return d >= sevenDaysAgo;
   }).length;
 
   weekCompletedEl.textContent = `${weekDoneCount} task${weekDoneCount === 1 ? '' : 's'}`;
 
-  // Simple active streak calculation based on unique completion dates
   const dates = new Set();
   state.tasks.forEach(t => {
     if (t.done && t.doneAt) {
-      dates.add(t.doneAt.slice(0, 10));
+      const str = getDoneAtString(t);
+      if (str && str.length >= 10) {
+        dates.add(str.slice(0, 10));
+      }
     }
   });
 
