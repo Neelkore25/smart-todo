@@ -7,7 +7,7 @@ html, body{ margin: 0; padding: 0; min-height: 100%; }
 html{ background: var(--bg); }
 
 body{
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Inter', SF Pro Display, SF Pro Text, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   font-size: var(--fs-base);
   line-height: 1.5;
   color: var(--text);
@@ -21,21 +21,21 @@ body{
 html{ transition: background-color var(--dur-base) ease; }
 
 h1, h2, h3, .display{
-  font-family: 'Manrope', 'Inter', sans-serif;
-  letter-spacing: -0.01em;
+  font-family: 'Inter', SF Pro Display, -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: -0.02em;
 }
 
 ::selection{ background: var(--accent); color: #FFFFFF; }
 ::-moz-selection{ background: var(--accent); color: #FFFFFF; }
 
 /* Slim, unobtrusive scrollbar */
-::-webkit-scrollbar{ width: 10px; height: 10px; }
+::-webkit-scrollbar{ width: 8px; height: 8px; }
 ::-webkit-scrollbar-track{ background: transparent; }
 ::-webkit-scrollbar-thumb{ background: var(--scrollbar-thumb); border-radius: 99px; border: 2px solid transparent; background-clip: padding-box; }
-::-webkit-scrollbar-thumb:hover{ background: rgba(255,255,255,0.2); background-clip: padding-box; }
-*{ scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.14) transparent; }
+::-webkit-scrollbar-thumb:hover{ background: rgba(255,255,255,0.25); background-clip: padding-box; }
+*{ scrollbar-width: thin; scrollbar-color: var(--scrollbar-thumb) transparent; }
 
-/* Consistent, visible focus ring everywhere — never removed, only restyled */
+/* Consistent focus ring */
 :focus{ outline: none; }
 :focus-visible{
   outline: 2px solid var(--accent);
@@ -47,15 +47,13 @@ a{ color: var(--accent-2); }
 
 button, input, select, textarea{ font-family: inherit; }
 
-/* High-contrast typing cursor across all text fields */
+/* High-contrast typing cursor */
 input, textarea, [contenteditable="true"]{
-  caret-color: #06B6D4; /* Vivid bright cyan caret — never camouflaged */
+  caret-color: var(--accent);
   color: var(--text);
 }
 
-/* ---------- Ambient background ----------
-   Two soft, slow-moving radial glows behind the glass layer. Pure CSS,
-   GPU-friendly (opacity/transform only), disabled under reduced-motion. */
+/* Ambient background glows */
 .ambient{
   position: fixed;
   inset: 0;
@@ -67,35 +65,35 @@ input, textarea, [contenteditable="true"]{
 .ambient::after{
   content: '';
   position: absolute;
-  width: 60vw;
-  height: 60vw;
-  max-width: 700px;
-  max-height: 700px;
+  width: 50vw;
+  height: 50vw;
+  max-width: 600px;
+  max-height: 600px;
   border-radius: 50%;
-  filter: blur(120px);
-  opacity: 0.16;
+  filter: blur(140px);
+  opacity: 0.12;
   will-change: transform;
 }
 .ambient::before{
   background: var(--accent);
-  top: -12%;
-  left: -8%;
-  animation: driftA 26s ease-in-out infinite;
+  top: -10%;
+  left: -5%;
+  animation: driftA 28s ease-in-out infinite;
 }
 .ambient::after{
   background: var(--accent-2);
-  bottom: -16%;
-  right: -10%;
-  opacity: 0.12;
-  animation: driftB 30s ease-in-out infinite;
+  bottom: -12%;
+  right: -5%;
+  opacity: 0.09;
+  animation: driftB 32s ease-in-out infinite;
 }
 @keyframes driftA{
   0%, 100%{ transform: translate(0,0); }
-  50%{ transform: translate(4%, 6%); }
+  50%{ transform: translate(3%, 5%); }
 }
 @keyframes driftB{
   0%, 100%{ transform: translate(0,0); }
-  50%{ transform: translate(-5%, -4%); }
+  50%{ transform: translate(-4%, -3%); }
 }
 
 /* ---------- Loader ---------- */
@@ -115,7 +113,6 @@ input, textarea, [contenteditable="true"]{
 @keyframes spin{ to{ transform: rotate(360deg); } }
 .loader-text{ color: var(--text-2); font-size: var(--fs-sm); font-weight: 600; letter-spacing: .02em; }
 
-/* Utility */
 .visually-hidden{
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;

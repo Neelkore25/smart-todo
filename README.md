@@ -1,49 +1,55 @@
 # Smart-Todo
 
-A premium, glassmorphic task manager focused on daily productivity and execution — priorities, categories, a calendar view, a Pomodoro timer, daily goals, and achievements, all in a single fast, dependency-free interface.
+A premium, modern task manager designed for daily productivity and execution — featuring high-contrast priority tracking, category tagging, visual monthly calendar view, Pomodoro focus timer, daily goal tracking, and achievements in a clean, local-first web application.
 
-![Smart-Todo screenshot](assets/screenshot.png)
+🚀 **Live Website:** [https://neelkore25.github.io/smart-todo/](https://neelkore25.github.io/smart-todo/)
 
-Built with vanilla HTML, CSS, and JavaScript (ES modules). No framework, no build process, and no external UI library — every icon is a hand-authored inline SVG, so there's nothing to fetch and nothing to break.
+---
 
-## Features
+## Highlights & Features
 
-- **Task management** — add, edit in place (double-click), complete, delete with undo support, and recurring task support (daily / weekly)
-- **Priorities & categories** — high / medium / low priority with color-coded borders, five categories (Work, Personal, Study, Health, Other)
-- **Search, filter & sort** — instant search, All / Active / Completed tabs, sort by newest, oldest, alphabetical, priority, or manual drag-and-drop order
-- **Calendar view** — month grid with due-date indicators; select a day to filter the task list
-- **Pomodoro timer** — 25-minute focus / 5-minute break cycle with toast notifications on transitions
-- **Daily goal ring** — set a daily completion target and track it with an animated progress ring
-- **Achievements** — unlockable badges for completion milestones
-- **Voice input** — dictate a task using the Web Speech API (gracefully falls back if unsupported)
-- **Task suggestions** — quick category-aware suggestions to beat a blank input
-- **Import / export** — back up or restore your task list as JSON
-- **Keyboard shortcuts** — `N` new task, `/` search, `U` undo, `Esc` cancel
-- **Persistent** — everything is saved to `localStorage`, with an in-memory fallback if `localStorage` is unavailable
-- **Accessible** — visible focus states, `aria-live` toasts, semantic roles on tabs, and full `prefers-reduced-motion` support
+- **Local-First & E2E Privacy** — 100% client-side task persistence using `localStorage`. Instant load with zero login friction.
+- **Task Management** — Add, edit inline, complete, delete with undo support, and set recurring schedules (daily / weekly).
+- **Priorities & Categories** — Color-coded priority hierarchy (High, Medium, Low) and quick category tags (Work, Personal, Study, Health, Other).
+- **Pointer Events Drag & Drop** — Smooth 60fps drag-and-drop task reordering across desktop and touch devices.
+- **Visual Monthly Calendar** — Full monthly calendar grid with month navigation, today marker, task due indicators, and date presets.
+- **Pomodoro Timer** — Integrated 25-minute focus session timer with break notifications.
+- **Daily Goals & Progress Ring** — Track completed tasks against a daily target with animated progress ring.
+- **Smart AI Suggestions** — Dynamic contextual task suggestions to jumpstart your workflow.
+- **Voice Dictation** — Built-in speech-to-text task input via native Web Speech API.
+- **Customizable Preferences** — Functional Settings modal for default priorities, default categories, themes, audio/toast toggles, and data reset.
+- **Import / Export** — Export and restore complete task data as JSON.
+- **Dark & Light Themes** — Inspired by Linear, Vercel, and Raycast dark-first design principles.
 
-## Tech stack
+---
 
-| | |
-|---|---|
-| Markup | Semantic HTML5 |
-| Styling | Modern CSS — custom properties, `backdrop-filter` glassmorphism, an 8px spacing system, no preprocessor |
-| Logic | Vanilla JavaScript using native ES modules (no bundler, no framework, no dependencies) |
-| Fonts | [Inter](https://fonts.google.com/specimen/Inter) & [Manrope](https://fonts.google.com/specimen/Manrope) via Google Fonts |
-| Storage | `localStorage`, with an in-memory fallback |
+## Tech Stack
 
-## Getting started
+- **Frontend:** Vanilla HTML5, Modern CSS (Custom Properties, Glassmorphic Surfaces, 8px Spacing Grid)
+- **Scripting:** Vanilla JavaScript (Native ES Modules, No Build Tools Required)
+- **Icons:** Inline SVG Lucide Icon Registry
+- **Fonts:** Inter & System Sans-Serif Stack
+- **Persistence:** LocalStorage with In-Memory Fallback
+- **Hosting:** GitHub Pages Compatible
 
-Because the app uses native ES modules (`<script type="module">`), browsers block module imports over `file://` for security reasons. Serve the folder instead — any static server works.
+---
 
-> **Recommended:** Node.js 18 or later.
+## Running Locally
+
+Because the application uses native JavaScript ES modules (`<script type="module">`), open it using a local HTTP server:
 
 ```bash
-git clone https://github.com/<your-username>/smart-todo.git
+git clone https://github.com/Neelkore25/smart-todo.git
 cd smart-todo
 
-# Option A — no install required
+# Start a local static server (Node.js)
 npx serve .
+```
 
-# Option B — via the included npm script
-npm start
+Open `http://localhost:3000` in your browser.
+
+---
+
+## License
+
+MIT License © [Neel Kore](https://github.com/Neelkore25)
