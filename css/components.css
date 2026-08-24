@@ -83,7 +83,7 @@ select option {
   padding: 8px 12px;
 }
 
-/* ---------- Add-task card ---------- */
+/* ---------- Compact Add-task card & Collapsible Drawer ---------- */
 .add-card{ position: relative; z-index: 10; padding: var(--space-4); }
 .add-row-main{ display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap; }
 .add-row-main input[type="text"], #taskInput{
@@ -106,7 +106,15 @@ select option {
 .btn-primary:active{ transform: scale(.97); }
 .btn-primary svg{ width: 16px; height: 16px; }
 
-.add-row-extra{ display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-2); margin-top: var(--space-4); }
+/* Expandable Drawer */
+.add-row-extra{
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-2); margin-top: var(--space-4);
+  max-height: 300px; opacity: 1; transition: max-height 0.28s var(--ease), opacity 0.22s ease, margin 0.22s ease;
+  overflow: hidden;
+}
+.add-row-extra.hidden {
+  max-height: 0; opacity: 0; margin-top: 0; pointer-events: none;
+}
 .add-row-extra .full{ grid-column: 1 / -1; }
 .add-row-extra input, .add-row-extra select, .add-row-extra textarea{
   border: 1px solid var(--border); background: var(--glass); color: var(--text);
@@ -147,6 +155,7 @@ select option {
   animation: cardIn .25s var(--ease);
 }
 .task-card:hover{
+  transform: translateY(-2px);
   border-color: var(--border-strong);
   box-shadow: var(--shadow-md);
 }
@@ -379,6 +388,14 @@ body.compact-mode .task-card { padding: 10px 14px; }
 .goal-set input{ width: 60px; border: 1px solid var(--border); background: var(--glass); border-radius: 6px; padding: 6px 8px; color: var(--text); }
 .goal-set button{ border: none; background: var(--accent-grad); color: #FFFFFF; border-radius: 6px; padding: 0 12px; font-size: var(--fs-xs); cursor: pointer; font-weight: 700; }
 
+.streak-stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
+.streak-box {
+  background: var(--glass); border: 1px solid var(--border); padding: 10px 12px;
+  border-radius: var(--r-sm); display: flex; flex-direction: column; align-items: center; text-align: center;
+}
+.streak-box b { font-size: var(--fs-base); color: var(--accent); font-weight: 700; }
+.streak-box span { font-size: 0.68rem; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.04em; margin-top: 2px; }
+
 .badges-row{ display: flex; gap: var(--space-2); flex-wrap: wrap; }
 .achievement{
   width: 42px; height: 42px; border-radius: var(--r-sm); display: flex; align-items: center; justify-content: center;
@@ -394,6 +411,18 @@ body.compact-mode .task-card { padding: 10px 14px; }
   opacity: 0; pointer-events: none; transition: opacity var(--dur-fast) ease; z-index: 5;
 }
 .achievement:hover .tip{ opacity: 1; }
+
+/* ---------- Shortcuts Help List ---------- */
+.shortcuts-list { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.shortcut-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 12px; border-radius: var(--r-sm); background: var(--glass); border: 1px solid var(--border);
+  font-size: var(--fs-sm); color: var(--text);
+}
+.shortcut-item kbd {
+  background: var(--overlay-med); border: 1px solid var(--border-strong);
+  padding: 3px 7px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; color: var(--accent);
+}
 
 /* ---------- Footer controls ---------- */
 .app-footer button, .app-footer label{

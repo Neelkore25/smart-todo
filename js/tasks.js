@@ -1,12 +1,13 @@
 /* ============================================================
    TASKS — list rendering, subtasks, filtering/sorting, CRUD actions,
-   inline editing, pointer drag-and-drop, and import/export.
+   natural language quick-add, smart sort, and import/export.
    ============================================================ */
 import { $, $$ } from './dom.js';
 import { state, uid, persistTasks, nextOrder, todayISO } from './state.js';
 import { paintIcons } from './icons.js';
 import { toast } from './toast.js';
 import { renderStats, isOverdue } from './stats.js';
+import { parseNaturalLanguage, autoSuggestCategory } from './smart-parser.js';
 
 const taskListEl = $('#taskList');
 const emptyStateEl = $('#emptyState');
@@ -34,7 +35,25 @@ function getFilteredSortedTasks(){
   });
 
   const copy = list.slice();
+  const today = todayISO();
+
   switch (state.sortMode){
+    case 'smart': // Focus Today: Overdue > Due Today > High Priority > Newest
+      copy.sort((a, b) => {
+        const aOver = isOverdue(a) ? 1 : 0;
+        const bOver = isOverdue(b) ? 1 : 0;
+        if (aOver !== bOver) return bOver - aOver;
+
+        const aToday = a.due === today ? 1 : 0;
+        const bToday = b.due === today ? 1 : 0;
+        if (aToday !== bToday) return bToday - aToday;
+
+        const pDiff = priorityRank[a.priority] - priorityRank[b.priority];
+        if (pDiff !== 0) return pDiff;
+
+        return b.createdAt - a.createdAt;
+      });
+      break;
     case 'oldest': copy.sort((a, b) => a.createdAt - b.createdAt); break;
     case 'alpha': copy.sort((a, b) => a.text.localeCompare(b.text)); break;
     case 'priority': copy.sort((a, b) => priorityRank[a.priority] - priorityRank[b.priority] || b.createdAt - a.createdAt); break;
@@ -112,7 +131,6 @@ function taskCardHTML(t){
         ${totalSubCount > 0 ? `<span class="badge sub-badge"><i data-lucide="check-square"></i>${doneSubCount}/${totalSubCount} subtasks</span>` : ''}
       </div>
 
-      <!-- Subtasks Container -->
       <div class="subtasks-container" id="subtasks-${t.id}">
         <ul class="subtask-list">${subtasks.map(s => subtaskHTML(s, t.id)).join('')}</ul>
         <form class="add-subtask-form" data-taskid="${t.id}">
@@ -247,7 +265,6 @@ if (taskListEl) {
     const id = card.dataset.id;
     const t = state.tasks.find(x => x.id === id);
 
-    // Subtask click delegation
     const subItem = e.target.closest('.subtask-item');
     if (subItem && t) {
       const subId = subItem.dataset.subid;
@@ -314,18 +331,51 @@ if (taskListEl) {
 /* ---------- Task Form Initialization ---------- */
 export function initTaskForm() {
   if (!addForm) return;
+
+  const expandBtn = $('#expandAddExtraBtn');
+  const addExtra = $('#addExtra');
+
+  if (expandBtn && addExtra) {
+    expandBtn.addEventListener('click', () => {
+      addExtra.classList.toggle('hidden');
+      expandBtn.classList.toggle('active');
+    });
+  }
+
+  // Auto-suggest category as user types
+  if (taskInput) {
+    taskInput.addEventListener('input', (e) => {
+      const val = e.target.value;
+      const suggestedCat = autoSuggestCategory(val);
+      const categorySelect = $('#categorySelect');
+      if (categorySelect && suggestedCat !== 'Other') {
+        categorySelect.value = suggestedCat;
+      }
+    });
+  }
+
   addForm.addEventListener('submit', (e) => {
     e.preventDefault();
-    const text = taskInput.value.trim();
-    if (!text) return;
+    const rawVal = taskInput.value.trim();
+    if (!rawVal) return;
 
-    const priority = $('#prioritySelect').value;
-    const category = $('#categorySelect').value;
-    const due = $('#dueDateInput').value;
+    // Natural Language Parsing
+    const parsed = parseNaturalLanguage(rawVal);
+
+    const priority = parsed.priority || $('#prioritySelect').value;
+    const category = parsed.category || $('#categorySelect').value;
+    const due = parsed.due || $('#dueDateInput').value;
     const recurring = $('#recurringSelect').value;
     const notes = $('#notesInput').value.trim();
 
-    addTask({ text, priority, category, due, recurring, notes });
+    addTask({
+      text: parsed.cleanText || rawVal,
+      priority,
+      category,
+      due,
+      recurring,
+      notes
+    });
 
     taskInput.value = '';
     $('#notesInput').value = '';

@@ -1,4 +1,4 @@
-/* Stats Summary & Achievements Badges System */
+/* Stats Summary, Productivity Streak & Achievements Badges System */
 import { $ } from './dom.js';
 import { state, todayISO } from './state.js';
 import { ICONS } from './icons.js';
@@ -31,7 +31,38 @@ export function renderStats() {
     `;
   }
 
+  renderStreakWidget();
   renderAchievements(done);
+}
+
+function renderStreakWidget() {
+  const streakDaysEl = $('#streakDays');
+  const weekCompletedEl = $('#weekCompleted');
+
+  if (!streakDaysEl || !weekCompletedEl) return;
+
+  // Calculate tasks completed this week (last 7 days)
+  const now = new Date();
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+  const weekDoneCount = state.tasks.filter(t => {
+    if (!t.done || !t.doneAt) return false;
+    const d = new Date(t.doneAt);
+    return d >= sevenDaysAgo;
+  }).length;
+
+  weekCompletedEl.textContent = `${weekDoneCount} task${weekDoneCount === 1 ? '' : 's'}`;
+
+  // Simple active streak calculation based on unique completion dates
+  const dates = new Set();
+  state.tasks.forEach(t => {
+    if (t.done && t.doneAt) {
+      dates.add(t.doneAt.slice(0, 10));
+    }
+  });
+
+  const streak = dates.size > 0 ? dates.size : 1;
+  streakDaysEl.textContent = `${streak} day${streak === 1 ? '' : 's'}`;
 }
 
 function renderAchievements(doneCount) {

@@ -1,36 +1,37 @@
 /* ==========================================================================
-   ORBIT DESIGN SYSTEM — Design Tokens
-   Inspired by Linear, Vercel, Raycast, Apple & Notion design principles.
+   SMART-TODO DESIGN SYSTEM — Tokens
+   Deep Navy/Charcoal Dark-First Aesthetic (#0A0E17 - #12151F)
+   Electric Cyan/Blue Accent (#00D4FF / #00B8FF)
    ========================================================================== */
 
-/* ---------- Dark Theme (Default & [data-theme="dark"]) ---------- */
+/* ---------- Dark Theme System (Default & [data-theme="dark"]) ---------- */
 :root,
 html[data-theme="dark"] {
   color-scheme: dark;
 
-  /* Backgrounds & Surfaces */
-  --bg:                  #08090D;
-  --bg-subtle:           #0E1017;
+  /* Surfaces & Backgrounds */
+  --bg:                  #0A0E17;
+  --bg-subtle:           #0F1420;
   --surface:             rgba(255, 255, 255, 0.040);
   --surface-2:           rgba(255, 255, 255, 0.065);
-  --surface-elevated:    #12151F;
+  --surface-elevated:    #121826;
 
   --glass:               rgba(255, 255, 255, 0.040);
   --glass-hover:         rgba(255, 255, 255, 0.075);
   --glass-strong:        rgba(255, 255, 255, 0.110);
 
   /* Borders */
-  --border:              rgba(255, 255, 255, 0.07);
-  --border-strong:       rgba(255, 255, 255, 0.15);
-  --border-accent:       rgba(99, 102, 241, 0.40);
+  --border:              rgba(255, 255, 255, 0.08);
+  --border-strong:       rgba(255, 255, 255, 0.16);
+  --border-accent:       rgba(0, 212, 255, 0.40);
 
   /* Brand Accents */
-  --accent:              #6366F1;
-  --accent-light:        #818CF8;
-  --accent-soft:         rgba(99, 102, 241, 0.15);
-  --accent-2:            #38BDF8;
-  --accent-2-soft:       rgba(56, 189, 248, 0.15);
-  --accent-grad:         linear-gradient(135deg, #6366F1 0%, #38BDF8 100%);
+  --accent:              #00D4FF;
+  --accent-light:        #38BDF8;
+  --accent-soft:         rgba(0, 212, 255, 0.15);
+  --accent-2:            #00B8FF;
+  --accent-2-soft:       rgba(0, 184, 255, 0.15);
+  --accent-grad:         linear-gradient(135deg, #00D4FF 0%, #0088FF 100%);
 
   /* Typography */
   --text:                #F8FAFC;
@@ -44,7 +45,7 @@ html[data-theme="dark"] {
 
   --priority-high:       #F87171;
   --priority-med:        #FBBF24;
-  --priority-low:        #38BDF8;
+  --priority-low:        #00D4FF;
 
   /* Overlays & Badges */
   --overlay-soft:        rgba(255, 255, 255, 0.035);
@@ -52,11 +53,11 @@ html[data-theme="dark"] {
   --ripple-color:        rgba(255, 255, 255, 0.18);
   --notes-bg:            rgba(0, 0, 0, 0.25);
 
-  --badge-cat-color:     #A5B4FC;
+  --badge-cat-color:     #38BDF8;
   --badge-due-color:     #7DD3FC;
   --badge-overdue-color: #F87171;
 
-  --toast-bg:            #11131A;
+  --toast-bg:            #121826;
   --toast-text:          #F8FAFC;
   --toast-btn-bg:        rgba(255, 255, 255, 0.08);
   --toast-btn-hover:     rgba(255, 255, 255, 0.16);
@@ -65,11 +66,11 @@ html[data-theme="dark"] {
   --shadow-sm:           0 1px 2px rgba(0, 0, 0, 0.35);
   --shadow-md:           0 8px 24px -6px rgba(0, 0, 0, 0.50);
   --shadow-lg:           0 20px 40px -10px rgba(0, 0, 0, 0.65);
-  --shadow-accent:       0 6px 20px -4px rgba(99, 102, 241, 0.35);
+  --shadow-accent:       0 6px 20px -4px rgba(0, 212, 255, 0.35);
 
-  /* Form & Control Select Option Colors */
+  /* Dropdown & Control Colors */
   --scrollbar-thumb:     rgba(255, 255, 255, 0.14);
-  --option-bg:           #0E1017;
+  --option-bg:           #0F1420;
   --option-color:        #F8FAFC;
 }
 
@@ -91,15 +92,15 @@ html[data-theme="light"] {
   /* Borders */
   --border:              rgba(15, 23, 42, 0.08);
   --border-strong:       rgba(15, 23, 42, 0.16);
-  --border-accent:       rgba(79, 70, 229, 0.40);
+  --border-accent:       rgba(2, 132, 199, 0.40);
 
   /* Brand Accents */
-  --accent:              #4F46E5;
-  --accent-light:        #6366F1;
-  --accent-soft:         rgba(79, 70, 229, 0.12);
-  --accent-2:            #0284C7;
-  --accent-2-soft:       rgba(2, 132, 199, 0.12);
-  --accent-grad:         linear-gradient(135deg, #4F46E5 0%, #0284C7 100%);
+  --accent:              #0284C7;
+  --accent-light:        #00D4FF;
+  --accent-soft:         rgba(2, 132, 199, 0.12);
+  --accent-2:            #0369A1;
+  --accent-2-soft:       rgba(3, 105, 161, 0.12);
+  --accent-grad:         linear-gradient(135deg, #0284C7 0%, #0369A1 100%);
 
   /* Typography */
   --text:                #0F172A;
@@ -121,8 +122,8 @@ html[data-theme="light"] {
   --ripple-color:        rgba(15, 23, 42, 0.15);
   --notes-bg:            rgba(15, 23, 42, 0.04);
 
-  --badge-cat-color:     #4F46E5;
-  --badge-due-color:     #0284C7;
+  --badge-cat-color:     #0284C7;
+  --badge-due-color:     #0369A1;
   --badge-overdue-color: #DC2626;
 
   --toast-bg:            #FFFFFF;
@@ -134,7 +135,7 @@ html[data-theme="light"] {
   --shadow-sm:           0 1px 2px rgba(15, 23, 42, 0.05);
   --shadow-md:           0 8px 20px -6px rgba(15, 23, 42, 0.10);
   --shadow-lg:           0 16px 36px -10px rgba(15, 23, 42, 0.14);
-  --shadow-accent:       0 6px 18px -4px rgba(79, 70, 229, 0.28);
+  --shadow-accent:       0 6px 18px -4px rgba(2, 132, 199, 0.28);
 
   /* Dropdown & Control Colors */
   --scrollbar-thumb:     rgba(15, 23, 42, 0.18);
@@ -159,14 +160,14 @@ html[data-theme="light"] {
 
     --border:              rgba(15, 23, 42, 0.08);
     --border-strong:       rgba(15, 23, 42, 0.16);
-    --border-accent:       rgba(79, 70, 229, 0.40);
+    --border-accent:       rgba(2, 132, 199, 0.40);
 
-    --accent:              #4F46E5;
-    --accent-light:        #6366F1;
-    --accent-soft:         rgba(79, 70, 229, 0.12);
-    --accent-2:            #0284C7;
-    --accent-2-soft:       rgba(2, 132, 199, 0.12);
-    --accent-grad:         linear-gradient(135deg, #4F46E5 0%, #0284C7 100%);
+    --accent:              #0284C7;
+    --accent-light:        #00D4FF;
+    --accent-soft:         rgba(2, 132, 199, 0.12);
+    --accent-2:            #0369A1;
+    --accent-2-soft:       rgba(3, 105, 161, 0.12);
+    --accent-grad:         linear-gradient(135deg, #0284C7 0%, #0369A1 100%);
 
     --text:                #0F172A;
     --text-2:              #475569;
@@ -185,8 +186,8 @@ html[data-theme="light"] {
     --ripple-color:        rgba(15, 23, 42, 0.15);
     --notes-bg:            rgba(15, 23, 42, 0.04);
 
-    --badge-cat-color:     #4F46E5;
-    --badge-due-color:     #0284C7;
+    --badge-cat-color:     #0284C7;
+    --badge-due-color:     #0369A1;
     --badge-overdue-color: #DC2626;
 
     --toast-bg:            #FFFFFF;
@@ -197,7 +198,7 @@ html[data-theme="light"] {
     --shadow-sm:           0 1px 2px rgba(15, 23, 42, 0.05);
     --shadow-md:           0 8px 20px -6px rgba(15, 23, 42, 0.10);
     --shadow-lg:           0 16px 36px -10px rgba(15, 23, 42, 0.14);
-    --shadow-accent:       0 6px 18px -4px rgba(79, 70, 229, 0.28);
+    --shadow-accent:       0 6px 18px -4px rgba(2, 132, 199, 0.28);
 
     --scrollbar-thumb:     rgba(15, 23, 42, 0.18);
     --option-bg:           #FFFFFF;
