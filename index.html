@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Orbit — Intentional Task & Execution Workspace</title>
+<meta name="description" content="Orbit is a SaaS-quality productivity workspace featuring command palette, priority matrix, visual calendar grid, Pomodoro focus timer, daily goal tracking, and client-side E2E encryption." />
+<meta name="theme-color" id="themeColorMeta" content="#08090D" />
+<script>
+  /* Synchronous Theme Bootstrapper — Eliminates FOUC (flash of unstyled theme) */
+  (function(){
+    var ORDER = ['dark', 'light', 'auto'];
+    try{
+      var raw = localStorage.getItem('smarttodo.theme');
+      if (raw === null) raw = localStorage.getItem('momentum.theme');
+      var mode = raw !== null ? JSON.parse(raw) : 'dark';
+      if (ORDER.indexOf(mode) === -1) mode = 'dark';
+      document.documentElement.setAttribute('data-theme', mode);
+
+      var isLight = mode === 'light' ||
+        (mode === 'auto' && window.matchMedia('(prefers-color-scheme: light)').matches);
+      var meta = document.getElementById('themeColorMeta');
+      if (meta) meta.setAttribute('content', isLight ? '#F8FAFC' : '#08090D');
+    }catch(e){
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  })();
+</script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%236366F1'/%3E%3Cstop offset='100%25' stop-color='%2338BDF8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='24' height='24' rx='6' fill='url(%23g)'/%3E%3Cpath d='M6 12.5l4 4 8-9' stroke='white' stroke-width='2.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+
+<div class="ambient" aria-hidden="true"></div>
+
+<div id="loader">
+  <div class="spinner"></div>
+  <div class="loader-text">Loading Orbit Workspace…</div>
+</div>
+
+<div class="app" id="app">
+
+  <!-- ============ HEADER ============ -->
+  <header class="topbar glass">
+    <div class="brand">
+      <div class="logo-badge"><i data-lucide="check-check"></i></div>
+      <h1>Orbit</h1>
+    </div>
+    <div class="stats-pills" id="statsPills"></div>
+    <div class="topbar-actions">
+      <button id="commandPaletteTriggerBtn" class="cmd-palette-btn" type="button" title="Open Command Palette (Cmd+K / Ctrl+K)">
+        <i data-lucide="search"></i>
+        <span>Command</span>
+        <kbd>⌘K</kbd>
+      </button>
+      <button id="authBadgeBtn" class="auth-badge-btn setup" type="button" title="E2E Encrypted Vault">
+        <i data-lucide="key"></i> <span>E2E Vault</span>
+      </button>
+      <button id="settingsToggleBtn" class="icon-btn" title="Settings" aria-label="Open settings">
+        <i data-lucide="settings"></i>
+      </button>
+      <button id="themeToggle" class="icon-btn" title="Theme: dark" aria-label="Toggle theme">
+        <i data-lucide="sun"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="main-col">
+
+    <!-- ============ PROGRESS ============ -->
+    <section class="progress-card glass" aria-label="Overall progress">
+      <div class="progress-info">
+        <span id="progressLabel">0% complete</span>
+        <span id="goalLabel"></span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    </section>
+
+    <!-- ============ TOOLBAR ============ -->
+    <section class="toolbar glass" aria-label="Search, filter and sort">
+      <div class="search-wrap">
+        <i data-lucide="search"></i>
+        <input id="searchInput" placeholder="Search tasks…  ( / )" aria-label="Search tasks" />
+      </div>
+      <div class="filter-tabs" role="tablist" aria-label="Filter tasks">
+        <button class="tab active" data-filter="all" type="button" role="tab" aria-selected="true">All</button>
+        <button class="tab" data-filter="active" type="button" role="tab" aria-selected="false">Active</button>
+        <button class="tab" data-filter="completed" type="button" role="tab" aria-selected="false">Completed</button>
+      </div>
+      <select id="sortSelect" aria-label="Sort tasks">
+        <option value="newest">Newest</option>
+        <option value="oldest">Oldest</option>
+        <option value="alpha">Alphabetical</option>
+        <option value="priority">Priority</option>
+        <option value="manual">Manual (drag)</option>
+      </select>
+      <select id="categoryFilter" aria-label="Filter by category">
+        <option value="all">All categories</option>
+        <option value="Work">Work</option>
+        <option value="Personal">Personal</option>
+        <option value="Study">Study</option>
+        <option value="Health">Health</option>
+        <option value="Other">Other</option>
+      </select>
+      <div class="date-filter-wrap">
+        <button id="datePickerToggle" class="date-trigger-btn" type="button" title="Filter by date" aria-label="Filter by date" aria-expanded="false">
+          <i data-lucide="calendar"></i>
+          <span id="dateFilterLabel">Calendar</span>
+        </button>
+        <div class="date-popover glass" id="datePopover" hidden>
+          <div class="date-popover-header">
+            <button type="button" class="cal-nav-btn" id="calPrevMonth" title="Previous month"><i data-lucide="chevron-left"></i></button>
+            <span class="popover-title" id="calMonthYearLabel">August 2026</span>
+            <button type="button" class="cal-nav-btn" id="calNextMonth" title="Next month"><i data-lucide="chevron-right"></i></button>
+          </div>
+          <div class="date-presets">
+            <button type="button" class="preset-btn" data-preset="today">Today</button>
+            <button type="button" class="preset-btn" data-preset="tomorrow">Tomorrow</button>
+            <button type="button" class="preset-btn" data-preset="overdue">Overdue</button>
+          </div>
+          <div class="cal-grid-wrapper" id="calGridDays"></div>
+          <div class="date-popover-actions">
+            <button type="button" id="dpClear" class="secondary full-w">Clear Filter</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ ADD TASK ============ -->
+    <section class="add-card glass" aria-label="Add a task">
+      <form id="addForm">
+        <div class="add-row-main">
+          <input id="taskInput" type="text" placeholder="What needs to get done?  ( n )" maxlength="200" required />
+          <button type="button" id="micBtn" class="icon-btn" title="Voice input" aria-label="Voice input"><i data-lucide="mic"></i></button>
+          <button type="button" id="aiSuggestBtn" class="icon-btn" title="Generate AI task suggestion" aria-label="Suggest a task"><i data-lucide="sparkles"></i></button>
+          <button type="submit" class="btn-primary">Add <i data-lucide="plus"></i></button>
+        </div>
+        <div class="add-row-extra" id="addExtra">
+          <select id="prioritySelect" aria-label="Priority">
+            <option value="low">Low priority</option>
+            <option value="med" selected>Medium priority</option>
+            <option value="high">High priority</option>
+          </select>
+          <select id="categorySelect" aria-label="Category">
+            <option value="Work">Work</option>
+            <option value="Personal">Personal</option>
+            <option value="Study">Study</option>
+            <option value="Health">Health</option>
+            <option value="Other" selected>Other</option>
+          </select>
+          <input type="date" id="dueDateInput" aria-label="Due date" />
+          <select id="recurringSelect" aria-label="Repeat">
+            <option value="none">Doesn't repeat</option>
+            <option value="daily">Repeats daily</option>
+            <option value="weekly">Repeats weekly</option>
+          </select>
+          <textarea id="notesInput" class="full" placeholder="Notes (optional)" rows="2"></textarea>
+        </div>
+      </form>
+    </section>
+
+    <!-- ============ LIST VIEW ============ -->
+    <section id="listView" aria-label="Task list">
+      <ul class="task-list" id="taskList"></ul>
+      <div class="empty-state" id="emptyState" hidden>
+        <svg viewBox="0 0 200 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="35" y="20" width="130" height="120" rx="14" fill="currentColor" opacity="0.08"/>
+          <rect x="55" y="45" width="90" height="10" rx="5" fill="currentColor" opacity="0.25"/>
+          <rect x="55" y="70" width="70" height="10" rx="5" fill="currentColor" opacity="0.2"/>
+          <rect x="55" y="95" width="55" height="10" rx="5" fill="currentColor" opacity="0.15"/>
+          <circle cx="140" cy="115" r="26" fill="currentColor" opacity="0.12"/>
+          <path d="M128 115l8 8 16-16" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>
+        </svg>
+        <h3 id="emptyTitle">Nothing on your list yet</h3>
+        <p id="emptySubtitle">Add a task above to get started.</p>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="side-col">
+    <div class="widget glass">
+      <h3><i data-lucide="timer"></i> Pomodoro focus</h3>
+      <div class="pomo-mode" id="pomoMode">Focus session</div>
+      <div class="pomo-display" id="pomoDisplay">25:00</div>
+      <div class="pomo-controls">
+        <button class="primary" id="pomoStart" type="button">Start</button>
+        <button id="pomoReset" type="button">Reset</button>
+      </div>
+    </div>
+
+    <div class="widget glass">
+      <h3><i data-lucide="target"></i> Daily goal</h3>
+      <div class="goal-row">
+        <svg class="goal-ring" viewBox="0 0 64 64">
+          <circle cx="32" cy="32" r="27" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="7"/>
+          <circle id="goalRingFill" cx="32" cy="32" r="27" fill="none" stroke="url(#goalGrad)" stroke-width="7" stroke-linecap="round" stroke-dasharray="169.6" stroke-dashoffset="169.6" transform="rotate(-90 32 32)"/>
+          <defs><linearGradient id="goalGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6366F1"/><stop offset="100%" stop-color="#38BDF8"/></linearGradient></defs>
+        </svg>
+        <div class="goal-info"><b id="goalCount">0 / 3</b><br/>tasks completed today</div>
+      </div>
+      <div class="goal-set">
+        <input type="number" id="goalInput" min="1" max="50" placeholder="3" aria-label="Set daily goal" />
+        <button id="goalSaveBtn" type="button">Set</button>
+      </div>
+    </div>
+
+    <div class="widget glass">
+      <h3><i data-lucide="award"></i> Achievements</h3>
+      <div class="badges-row" id="badgesRow"></div>
+    </div>
+  </aside>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="app-footer">
+    <button id="exportBtn" type="button"><i data-lucide="download"></i> Export JSON</button>
+    <label for="importInput"><i data-lucide="upload"></i> Import JSON</label>
+    <input type="file" id="importInput" accept="application/json" hidden />
+    <button id="clearCompletedBtn" type="button"><i data-lucide="trash-2"></i> Clear completed</button>
+    <span class="shortcuts-hint">Shortcuts: <b>⌘K</b> command palette · <b>n</b> new task · <b>/</b> search · <b>u</b> undo</span>
+  </footer>
+
+</div>
+
+<!-- ============ COMMAND PALETTE MODAL ============ -->
+<div class="modal-backdrop" id="commandPaletteModal" hidden>
+  <div class="palette-modal-card glass">
+    <div class="palette-header">
+      <i data-lucide="search"></i>
+      <input id="paletteSearchInput" placeholder="Type a command or search tasks…" aria-label="Command search" autocomplete="off" />
+      <button class="modal-close-btn" id="closePaletteBtn" aria-label="Close palette"><i data-lucide="x"></i></button>
+    </div>
+    <div class="palette-results" id="paletteResultsList"></div>
+    <div class="palette-footer">
+      <span><b>↑↓</b> navigate</span>
+      <span><b>↵</b> select</span>
+      <span><b>esc</b> close</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ E2E AUTH MODAL ============ -->
+<div class="modal-backdrop" id="authModal" hidden>
+  <div class="auth-modal-card glass">
+    <button class="modal-close-btn" id="closeAuthModal" aria-label="Close modal"><i data-lucide="x"></i></button>
+    <div class="auth-modal-header">
+      <div class="auth-icon-badge"><i data-lucide="shield-check"></i></div>
+      <h2 id="authModalTitle">E2E Encrypted Vault</h2>
+      <p id="authModalSubtitle">Secure your tasks with AES-256-GCM zero-knowledge encryption.</p>
+    </div>
+    <form id="authForm">
+      <div class="form-group" id="usernameGroup">
+        <label for="authUsername">Vault Username / Name</label>
+        <input type="text" id="authUsername" placeholder="e.g. Neel" maxlength="30" />
+      </div>
+      <div class="form-group">
+        <label for="authPassword">Master Password</label>
+        <input type="password" id="authPassword" placeholder="Enter master password..." required minlength="4" />
+      </div>
+      <div class="auth-security-badge">
+        <i data-lucide="lock"></i> <span>AES-256-GCM · PBKDF2 (100k iterations) · Client-side only</span>
+      </div>
+      <div class="auth-modal-actions">
+        <button type="submit" class="btn-primary full-width" id="authSubmitBtn">Unlock Vault</button>
+        <button type="button" class="btn-text" id="toggleAuthMode">Create New Vault / Reset</button>
+        <button type="button" class="btn-danger-soft" id="lockVaultBtn" hidden>Lock Vault Now</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ SETTINGS MODAL ============ -->
+<div class="modal-backdrop" id="settingsModal" hidden>
+  <div class="settings-modal-card glass">
+    <button class="modal-close-btn" id="closeSettingsBtn" aria-label="Close settings"><i data-lucide="x"></i></button>
+    <div class="settings-modal-header">
+      <div class="settings-icon-badge"><i data-lucide="settings"></i></div>
+      <h2>App Preferences</h2>
+      <p>Customize defaults, appearance, and manage your data.</p>
+    </div>
+    <form id="settingsForm">
+      <div class="setting-group">
+        <label for="settingThemeSelect">Color Theme</label>
+        <select id="settingThemeSelect">
+          <option value="auto">System Auto</option>
+          <option value="dark">Dark Theme (Default)</option>
+          <option value="light">Light Theme</option>
+        </select>
+      </div>
+      <div class="setting-group">
+        <label for="settingPrioritySelect">Default Task Priority</label>
+        <select id="settingPrioritySelect">
+          <option value="low">Low priority</option>
+          <option value="med">Medium priority</option>
+          <option value="high">High priority</option>
+        </select>
+      </div>
+      <div class="setting-group">
+        <label for="settingCategorySelect">Default Category</label>
+        <select id="settingCategorySelect">
+          <option value="Work">Work</option>
+          <option value="Personal">Personal</option>
+          <option value="Study">Study</option>
+          <option value="Health">Health</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="setting-row-toggle">
+        <span>Compact Card Spacing</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="settingCompactToggle" />
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="setting-row-toggle">
+        <span>Audio & Toast Feedback</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="settingSoundToggle" checked />
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="settings-divider"></div>
+      <div class="settings-danger-zone">
+        <button type="button" class="btn-danger-soft" id="resetDataBtn">
+          <i data-lucide="trash-2"></i> Reset All Tasks & Data
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer" aria-live="polite"></div>
+<div class="confetti-layer" id="confettiLayer" aria-hidden="true"></div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
