@@ -1,6 +1,7 @@
 /* ============================================================
    SMART-TODO MAIN MODULE — Pure JavaScript Application Entry Point.
    Wires all core modules, command palette, shortcuts, and initial render.
+   Includes defensive try-catch initialization wrapper.
    ============================================================ */
 import { $ } from './dom.js';
 import { paintIcons } from './icons.js';
@@ -33,6 +34,7 @@ function initRipple(){
   });
 }
 
+/* Fail-safe Loader Controller */
 function initLoader(){
   const reveal = () => {
     const loader = $('#loader');
@@ -40,29 +42,35 @@ function initLoader(){
     if (loader) loader.classList.add('hidden');
     if (app) app.classList.add('ready');
   };
-  window.addEventListener('load', () => setTimeout(reveal, 350));
-  setTimeout(reveal, 1000);
+  window.addEventListener('load', () => setTimeout(reveal, 250));
+  setTimeout(reveal, 600);
 }
 
+/* Defensive Main App Initialization Sequence */
 function init(){
-  initTheme();
-  initTaskForm();
-  initFilters();
-  initClearCompleted();
-  initExportImport();
-  initCalendar(renderList);
-  initPomodoro();
-  initDailyGoal();
-  initVoiceInput();
-  initSuggestions();
-  initShortcuts();
-  initSettings(renderList);
-  initCommandPalette(renderList);
-  initRipple();
-  initLoader();
+  try {
+    initTheme();
+    initTaskForm();
+    initFilters();
+    initClearCompleted();
+    initExportImport();
+    initCalendar(renderList);
+    initPomodoro();
+    initDailyGoal();
+    initVoiceInput();
+    initSuggestions();
+    initShortcuts();
+    initSettings(renderList);
+    initCommandPalette(renderList);
+    initRipple();
 
-  renderList();
-  paintIcons();
+    renderList();
+    paintIcons();
+  } catch (err) {
+    console.error('[Smart-Todo Initialization Error]:', err);
+  } finally {
+    initLoader();
+  }
 }
 
 init();

@@ -3,8 +3,8 @@ import { $ } from './dom.js';
 import { state, persistGoal, todayISO } from './state.js';
 import { toast } from './toast.js';
 
-/* Safe helper for checking doneAt date string */
-function getDoneAtString(t) {
+/* Defensive helper to safely convert doneAt (string, timestamp, Date, or object) to ISO string */
+export function getDoneAtString(t) {
   if (!t || !t.doneAt) return '';
   if (typeof t.doneAt === 'string') return t.doneAt;
   if (typeof t.doneAt === 'number') {
@@ -14,7 +14,18 @@ function getDoneAtString(t) {
       return '';
     }
   }
-  return String(t.doneAt);
+  if (t.doneAt instanceof Date) {
+    try {
+      return t.doneAt.toISOString();
+    } catch(e) {
+      return '';
+    }
+  }
+  try {
+    return String(t.doneAt);
+  } catch(e) {
+    return '';
+  }
 }
 
 /* ---------- Pomodoro Focus Session ---------- */
@@ -110,7 +121,12 @@ export function initDailyGoal() {
 
   function updateGoalUI() {
     const todayStr = todayISO();
-    const todayDone = state.tasks.filter(t => t.done && typeof t.doneAt === 'string' && t.doneAt.startsWith(todayStr)).length;
+    const todayDone = state.tasks.filter(t => {
+      if (!t || (!t.done && !t.completed)) return false;
+      const doneAtStr = getDoneAtString(t);
+      return typeof doneAtStr === 'string' && doneAtStr.startsWith(todayStr);
+    }).length;
+
     state.dailyGoal.count = todayDone;
     persistGoal();
 
