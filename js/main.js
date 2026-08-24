@@ -10,6 +10,7 @@ import { initPomodoro, initDailyGoal, initVoiceInput, initSuggestions } from './
 import { initShortcuts } from './shortcuts.js';
 import { initTheme } from './theme.js';
 import { initSettings } from './settings.js';
+import { initAuth } from './auth.js';
 
 window.paintIcons = paintIcons;
 
@@ -48,13 +49,14 @@ function init(){
   initFilters();
   initClearCompleted();
   initExportImport();
-  initCalendar(renderList); // calendar day/toggle selection re-filters the task list
+  initCalendar(renderList);
   initPomodoro();
   initDailyGoal();
   initVoiceInput();
   initSuggestions();
   initShortcuts();
   initSettings(renderList);
+  initAuth(renderList);
   initRipple();
   initLoader();
 

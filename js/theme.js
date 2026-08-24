@@ -1,45 +1,48 @@
 /* ============================================================
-   THEME — cycles auto → light → dark, persisted in storage.
-   'auto' follows the OS via prefers-color-scheme (see tokens.css).
+   THEME MODULE — Deterministic Dark / Light / Auto Theme Switching
+   Persisted in localStorage under 'smarttodo.theme'.
    ============================================================ */
 import { $ } from './dom.js';
 import { safeStorage } from './storage.js';
 import { ICONS } from './icons.js';
 
-const ORDER = ['auto', 'light', 'dark'];
+const ORDER = ['dark', 'light', 'auto'];
 
 const META = {
-  auto: { icon: 'sun-moon', title: 'Theme: auto' },
-  light: { icon: 'sun', title: 'Theme: light' },
-  dark: { icon: 'moon', title: 'Theme: dark' },
+  dark: { icon: 'sun', title: 'Switch to Light mode' },
+  light: { icon: 'moon', title: 'Switch to Dark mode' },
+  auto: { icon: 'sun-moon', title: 'Theme: System Auto' }
 };
 
-let currentThemeMode = 'auto';
+let currentThemeMode = 'dark';
 
 function apply(mode) {
   document.documentElement.setAttribute('data-theme', mode);
 
   const btn = $('#themeToggle');
-  if (!btn) return;
-
-  btn.title = META[mode].title;
-  btn.setAttribute('aria-label', META[mode].title);
-
-  // Fast icon update (no DOM rebuild)
-  const svg = btn.querySelector('svg');
-  if (svg && ICONS[META[mode].icon]) {
-    svg.innerHTML = ICONS[META[mode].icon];
+  if (btn) {
+    btn.title = META[mode].title;
+    btn.setAttribute('aria-label', META[mode].title);
+    const svg = btn.querySelector('svg');
+    if (svg && ICONS[META[mode].icon]) {
+      svg.innerHTML = ICONS[META[mode].icon];
+    }
   }
 
-  // Update browser theme color
+  // Also sync settings select if available
+  const settingSelect = $('#settingThemeSelect');
+  if (settingSelect && settingSelect.value !== mode) {
+    settingSelect.value = mode;
+  }
+
+  // Update theme-color meta tag
   const isLight =
     mode === 'light' ||
-    (mode === 'auto' &&
-      window.matchMedia('(prefers-color-scheme: light)').matches);
+    (mode === 'auto' && window.matchMedia('(prefers-color-scheme: light)').matches);
 
   const meta = $('#themeColorMeta');
   if (meta) {
-    meta.setAttribute('content', isLight ? '#F8FAFC' : '#080B10');
+    meta.setAttribute('content', isLight ? '#F5F7FA' : '#080B10');
   }
 }
 
@@ -48,15 +51,15 @@ export function getTheme() {
 }
 
 export function setTheme(mode) {
-  if (!ORDER.includes(mode)) mode = 'auto';
+  if (!ORDER.includes(mode)) mode = 'dark';
   currentThemeMode = mode;
   safeStorage.set('smarttodo.theme', mode);
   apply(mode);
 }
 
 export function initTheme() {
-  let mode = safeStorage.get('smarttodo.theme', 'auto');
-  if (!ORDER.includes(mode)) mode = 'auto';
+  let mode = safeStorage.get('smarttodo.theme', 'dark');
+  if (!ORDER.includes(mode)) mode = 'dark';
   currentThemeMode = mode;
 
   apply(mode);
@@ -68,4 +71,11 @@ export function initTheme() {
       setTheme(ORDER[nextIndex]);
     });
   }
+
+  // Listen for OS color scheme changes if set to auto
+  window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', () => {
+    if (currentThemeMode === 'auto') {
+      apply('auto');
+    }
+  });
 }

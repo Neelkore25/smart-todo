@@ -1,5 +1,6 @@
 /* ==========================================================================
-   COMPONENTS — Modern UI cards, buttons, custom controls & overlays
+   COMPONENTS — Theme-driven UI cards, buttons, custom controls & overlays
+   Every component consumes centralized CSS design tokens from tokens.css
    ========================================================================== */
 
 /* ---------- Icon button ---------- */
@@ -13,7 +14,7 @@
 }
 .icon-btn:hover{ color: var(--text); border-color: var(--border-strong); transform: translateY(-1px); }
 .icon-btn:active{ transform: scale(.94); }
-.icon-btn.active{ background: var(--accent-grad); color: #fff; border-color: transparent; box-shadow: var(--shadow-accent); }
+.icon-btn.active{ background: var(--accent-grad); color: #FFFFFF; border-color: transparent; box-shadow: var(--shadow-accent); }
 .icon-btn svg{ width: 17px; height: 17px; }
 
 /* ---------- Progress card ---------- */
@@ -50,32 +51,22 @@
   transition: color var(--dur-base) ease, background var(--dur-base) ease;
 }
 .tab:not(.active):hover{ color: var(--text); background: var(--overlay-soft); }
-.tab.active{ background: var(--accent-grad); color: #fff; box-shadow: var(--shadow-accent); }
+.tab.active{ background: var(--accent-grad); color: #FFFFFF; box-shadow: var(--shadow-accent); }
 
 select{
   border: 1px solid var(--border); background: var(--glass); color: var(--text);
   border-radius: var(--r-sm); padding: 8px 10px; font-size: var(--fs-sm); cursor: pointer;
-  transition: border-color var(--dur-base) ease;
+  transition: border-color var(--dur-base) ease, background-color var(--dur-base) ease, color var(--dur-base) ease;
   accent-color: var(--accent);
 }
 select:hover{ border-color: var(--border-strong); }
 select:focus-visible{ border-color: var(--accent); }
 
-/* Explicit option text & background contrast across all browsers & OS themes */
+/* Option dropdown styling driven entirely by theme variables */
 select option {
-  background-color: #0D1117;
-  color: #F5F7FA;
+  background-color: var(--option-bg);
+  color: var(--option-color);
   padding: 8px 12px;
-}
-html[data-theme="light"] select option {
-  background-color: #FFFFFF;
-  color: #0F172A;
-}
-@media (prefers-color-scheme: light) {
-  html[data-theme="auto"] select option {
-    background-color: #FFFFFF;
-    color: #0F172A;
-  }
 }
 
 /* ---------- Add-task card ---------- */
@@ -91,7 +82,7 @@ html[data-theme="light"] select option {
 
 .btn-primary{
   display: flex; align-items: center; gap: 6px; border: none; cursor: pointer;
-  background: var(--accent-grad); color: #fff;
+  background: var(--accent-grad); color: #FFFFFF;
   padding: 12px 20px; border-radius: var(--r-sm); font-weight: 700; font-size: var(--fs-sm);
   box-shadow: var(--shadow-accent);
   transition: transform var(--dur-fast) var(--ease), box-shadow var(--dur-base) ease, filter var(--dur-base) ease;
@@ -131,9 +122,10 @@ html[data-theme="light"] select option {
   display: flex; align-items: flex-start; gap: var(--space-2);
   padding: var(--space-4);
   border-radius: var(--r-md);
-  background: var(--surface);
+  background: var(--surface-2);
   border: 1px solid var(--border);
   border-left: 3px solid var(--priority-med);
+  box-shadow: var(--shadow-sm);
   transition: transform var(--dur-base) var(--ease), opacity var(--dur-base) var(--ease),
               box-shadow var(--dur-base) ease, background var(--dur-base) ease, border-color var(--dur-base) ease;
   cursor: default;
@@ -141,8 +133,8 @@ html[data-theme="light"] select option {
   animation: cardIn .25s var(--ease);
 }
 .task-card:hover{
-  background: var(--surface-2);
   border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
 }
 
 .task-card.priority-high { border-left-color: var(--priority-high); }
@@ -163,8 +155,9 @@ body.compact-mode .task-card { padding: 10px 14px; }
 .task-card.dragging-ghost {
   box-shadow: var(--shadow-lg), 0 0 0 2px var(--accent);
   border-color: var(--accent);
-  background: var(--bg-subtle);
-  opacity: 0.95;
+  background: var(--surface-elevated);
+  color: var(--text);
+  opacity: 0.96;
   cursor: grabbing !important;
 }
 
@@ -187,7 +180,7 @@ body.compact-mode .task-card { padding: 10px 14px; }
 }
 .check-btn:hover{ border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 .check-btn:focus-visible{ outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
-.check-btn svg{ width: 12px; height: 12px; stroke: #fff; stroke-width: 3; opacity: 0; transform: scale(.7); transition: all var(--dur-fast) ease; }
+.check-btn svg{ width: 12px; height: 12px; stroke: #FFFFFF; stroke-width: 3; opacity: 0; transform: scale(.7); transition: all var(--dur-fast) ease; }
 .task-card.done .check-btn{ background: var(--success); border-color: var(--success); }
 .task-card.done .check-btn svg{ opacity: 1; transform: scale(1); }
 
@@ -236,7 +229,7 @@ body.compact-mode .task-card { padding: 10px 14px; }
 
 .confirm-delete{ display: flex; align-items: center; gap: var(--space-2); font-size: var(--fs-xs); color: var(--text-2); animation: cardIn .18s var(--ease); white-space: nowrap; }
 .confirm-delete button{ border: none; padding: 6px 11px; border-radius: 6px; font-size: .72rem; font-weight: 700; cursor: pointer; }
-.confirm-delete .yes{ background: var(--danger); color: #fff; }
+.confirm-delete .yes{ background: var(--danger); color: #FFFFFF; }
 .confirm-delete .no{ background: var(--overlay-med); color: var(--text); }
 
 /* ---------- Empty state ---------- */
@@ -254,13 +247,13 @@ body.compact-mode .task-card { padding: 10px 14px; }
   cursor: pointer; transition: all var(--dur-base) ease;
 }
 .date-trigger-btn:hover { border-color: var(--border-strong); color: var(--text); transform: translateY(-1px); }
-.date-trigger-btn.active { background: var(--accent-grad); color: #fff; border-color: transparent; box-shadow: var(--shadow-accent); }
+.date-trigger-btn.active { background: var(--accent-grad); color: #FFFFFF; border-color: transparent; box-shadow: var(--shadow-accent); }
 .date-trigger-btn svg { width: 16px; height: 16px; }
 
 .date-popover{
   position: absolute; top: calc(100% + 10px); right: 0; z-index: 9999;
   width: 310px; padding: var(--space-4);
-  background: var(--bg-subtle); border: 1px solid var(--border-strong);
+  background: var(--surface-elevated); border: 1px solid var(--border-strong);
   border-radius: var(--r-lg); box-shadow: var(--shadow-lg);
   display: flex; flex-direction: column; gap: var(--space-3);
   backdrop-filter: blur(24px);
@@ -313,7 +306,7 @@ body.compact-mode .task-card { padding: 10px 14px; }
 }
 .date-popover-actions button.full-w { width: 100%; text-align: center; }
 .date-popover-actions button:hover{ color: var(--text); border-color: var(--border-strong); }
-.date-popover-actions button.primary{ background: var(--accent-grad); color: #fff; border: none; box-shadow: var(--shadow-accent); }
+.date-popover-actions button.primary{ background: var(--accent-grad); color: #FFFFFF; border: none; box-shadow: var(--shadow-accent); }
 .date-popover-actions button.secondary{ background: transparent; border-color: var(--border); }
 
 /* ---------- Sidebar widgets ---------- */
@@ -321,7 +314,7 @@ body.compact-mode .task-card { padding: 10px 14px; }
 .widget h3{ margin: 0 0 var(--space-3); font-size: var(--fs-sm); font-weight: 700; display: flex; align-items: center; gap: 6px; color: var(--text-2); text-transform: uppercase; letter-spacing: .04em; }
 .widget h3 svg{ width: 14px; height: 14px; color: var(--accent); }
 
-.pomo-display{ font-family: 'Inter', sans-serif; font-size: 2rem; font-weight: 700; text-align: center; margin: 4px 0 var(--space-3); letter-spacing: -0.02em; }
+.pomo-display{ font-family: 'Inter', sans-serif; font-size: 2rem; font-weight: 700; text-align: center; margin: 4px 0 var(--space-3); letter-spacing: -0.02em; color: var(--text); }
 .pomo-mode{ text-align: center; font-size: var(--fs-xs); color: var(--text-3); text-transform: uppercase; letter-spacing: .08em; margin-bottom: var(--space-2); }
 .pomo-controls{ display: flex; gap: var(--space-2); justify-content: center; }
 .pomo-controls button{
@@ -330,7 +323,7 @@ body.compact-mode .task-card { padding: 10px 14px; }
   transition: transform var(--dur-fast) var(--ease), border-color var(--dur-base) ease;
 }
 .pomo-controls button:hover{ border-color: var(--border-strong); transform: translateY(-1px); }
-.pomo-controls button.primary{ background: var(--accent-grad); color: #fff; border: none; box-shadow: var(--shadow-accent); }
+.pomo-controls button.primary{ background: var(--accent-grad); color: #FFFFFF; border: none; box-shadow: var(--shadow-accent); }
 
 .goal-row{ display: flex; align-items: center; gap: var(--space-3); }
 .goal-ring{ width: 58px; height: 58px; flex-shrink: 0; }
@@ -338,7 +331,7 @@ body.compact-mode .task-card { padding: 10px 14px; }
 .goal-info b{ color: var(--text); font-size: var(--fs-base); }
 .goal-set{ display: flex; gap: 6px; margin-top: var(--space-3); }
 .goal-set input{ width: 60px; border: 1px solid var(--border); background: var(--glass); border-radius: 6px; padding: 6px 8px; color: var(--text); }
-.goal-set button{ border: none; background: var(--accent-grad); color: #fff; border-radius: 6px; padding: 0 12px; font-size: var(--fs-xs); cursor: pointer; font-weight: 700; }
+.goal-set button{ border: none; background: var(--accent-grad); color: #FFFFFF; border-radius: 6px; padding: 0 12px; font-size: var(--fs-xs); cursor: pointer; font-weight: 700; }
 
 .badges-row{ display: flex; gap: var(--space-2); flex-wrap: wrap; }
 .achievement{
@@ -347,11 +340,11 @@ body.compact-mode .task-card { padding: 10px 14px; }
   transition: transform var(--dur-base) var(--ease), border-color var(--dur-base) ease;
 }
 .achievement:hover{ transform: translateY(-2px); }
-.achievement.unlocked{ background: var(--accent-grad); color: #fff; border-color: transparent; box-shadow: var(--shadow-accent); }
+.achievement.unlocked{ background: var(--accent-grad); color: #FFFFFF; border-color: transparent; box-shadow: var(--shadow-accent); }
 .achievement svg{ width: 18px; height: 18px; }
 .achievement .tip{
   position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%);
-  background: var(--bg-subtle); border: 1px solid var(--border-strong); color: var(--text); font-size: .68rem; padding: 5px 8px; border-radius: 6px; white-space: nowrap;
+  background: var(--surface-elevated); border: 1px solid var(--border-strong); color: var(--text); font-size: .68rem; padding: 5px 8px; border-radius: 6px; white-space: nowrap;
   opacity: 0; pointer-events: none; transition: opacity var(--dur-fast) ease; z-index: 5;
 }
 .achievement:hover .tip{ opacity: 1; }
@@ -387,9 +380,23 @@ body.compact-mode .task-card { padding: 10px 14px; }
 .confetti-piece{ position: absolute; top: -20px; border-radius: 2px; animation: confettiFall linear forwards; }
 @keyframes confettiFall{ to{ transform: translateY(110vh) rotate(600deg); opacity: .15; } }
 
-/* ---------- Settings Modal UI ---------- */
+/* ---------- Auth & E2E Vault UI ---------- */
 .topbar-actions { display: flex; align-items: center; gap: var(--space-2); }
 
+.auth-badge-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 14px; border-radius: var(--r-full);
+  font-size: var(--fs-xs); font-weight: 700; cursor: pointer;
+  border: 1px solid var(--border); background: var(--glass); color: var(--text-2);
+  transition: all var(--dur-base) ease;
+}
+.auth-badge-btn:hover { border-color: var(--border-strong); color: var(--text); transform: translateY(-1px); }
+.auth-badge-btn.unlocked { background: rgba(52, 211, 153, 0.16); color: var(--success); border-color: rgba(52, 211, 153, 0.35); }
+.auth-badge-btn.locked { background: rgba(248, 113, 113, 0.16); color: var(--danger); border-color: rgba(248, 113, 113, 0.35); }
+.auth-badge-btn.setup { background: var(--accent-soft); color: var(--accent-light); border-color: var(--border-accent); }
+.auth-badge-btn svg { width: 14px; height: 14px; }
+
+/* Modal backdrop & cards */
 .modal-backdrop {
   position: fixed; inset: 0; z-index: 99999;
   background: rgba(0, 0, 0, 0.65); backdrop-filter: blur(8px);
@@ -398,11 +405,11 @@ body.compact-mode .task-card { padding: 10px 14px; }
 }
 .modal-backdrop[hidden] { display: none !important; }
 
-.settings-modal-card {
-  position: relative; width: 100%; max-width: 420px;
-  background: var(--bg-subtle); border: 1px solid var(--border-strong);
+.settings-modal-card, .auth-modal-card {
+  position: relative; width: 100%; max-width: 430px;
+  background: var(--surface-elevated); border: 1px solid var(--border-strong);
   border-radius: var(--r-lg); padding: var(--space-6);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-lg); color: var(--text);
   display: flex; flex-direction: column; gap: var(--space-4);
   animation: scaleUp var(--dur-base) var(--ease);
 }
@@ -419,31 +426,48 @@ body.compact-mode .task-card { padding: 10px 14px; }
 .modal-close-btn:hover { color: var(--text); background: var(--glass-hover); border-color: var(--border-strong); }
 .modal-close-btn svg { width: 15px; height: 15px; }
 
-.settings-modal-header { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; }
-.settings-icon-badge {
+.settings-modal-header, .auth-modal-header { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; }
+.settings-icon-badge, .auth-icon-badge {
   width: 48px; height: 48px; border-radius: 12px;
-  background: var(--accent-grad); color: #fff;
+  background: var(--accent-grad); color: #FFFFFF;
   display: flex; align-items: center; justify-content: center;
   box-shadow: var(--shadow-accent); margin-bottom: 2px;
 }
-.settings-icon-badge svg { width: 22px; height: 22px; }
-.settings-modal-header h2 { margin: 0; font-size: var(--fs-lg); color: var(--text); font-weight: 700; }
-.settings-modal-header p { margin: 0; font-size: var(--fs-sm); color: var(--text-2); }
+.settings-icon-badge svg, .auth-icon-badge svg { width: 22px; height: 22px; }
+.settings-modal-header h2, .auth-modal-header h2 { margin: 0; font-size: var(--fs-lg); color: var(--text); font-weight: 700; }
+.settings-modal-header p, .auth-modal-header p { margin: 0; font-size: var(--fs-sm); color: var(--text-2); }
 
-#settingsForm { display: flex; flex-direction: column; gap: var(--space-3); margin-top: 4px; }
-.setting-group { display: flex; flex-direction: column; gap: 6px; }
-.setting-group label { font-size: var(--fs-xs); font-weight: 600; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.03em; }
-.setting-group select {
+#settingsForm, #authForm { display: flex; flex-direction: column; gap: var(--space-3); margin-top: 4px; }
+.setting-group, .form-group { display: flex; flex-direction: column; gap: 6px; }
+.setting-group label, .form-group label { font-size: var(--fs-xs); font-weight: 600; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.03em; }
+.setting-group select, .form-group input {
   width: 100%; padding: 9px 12px; border-radius: var(--r-sm);
   border: 1px solid var(--border); background: var(--glass); color: var(--text);
   font-size: var(--fs-sm); outline: none; transition: all var(--dur-base) ease;
 }
-.setting-group select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.setting-group select:focus, .form-group input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
 
 .setting-row-toggle {
   display: flex; align-items: center; justify-content: space-between;
   padding: 8px 0; font-size: var(--fs-sm); color: var(--text); font-weight: 500;
 }
+
+.auth-security-badge {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 12px; border-radius: var(--r-sm);
+  background: var(--accent-soft); border: 1px solid var(--border-accent);
+  color: var(--accent-light); font-size: 0.7rem; font-weight: 600;
+}
+.auth-security-badge svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+.auth-modal-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+.btn-primary.full-width { width: 100%; justify-content: center; padding: 12px; }
+.btn-text {
+  background: transparent; border: none; color: var(--text-2);
+  font-size: var(--fs-xs); font-weight: 600; cursor: pointer; padding: 6px;
+  transition: color var(--dur-fast) ease;
+}
+.btn-text:hover { color: var(--text); text-decoration: underline; }
 
 /* Custom Toggle Switch */
 .toggle-switch { position: relative; display: inline-block; width: 42px; height: 22px; }
@@ -455,7 +479,7 @@ body.compact-mode .task-card { padding: 10px 14px; }
 }
 .toggle-switch .slider:before {
   position: absolute; content: ""; height: 16px; width: 16px;
-  left: 3px; bottom: 3px; background-color: white; border-radius: 50%;
+  left: 3px; bottom: 3px; background-color: #FFFFFF; border-radius: 50%;
   transition: .2s ease;
 }
 .toggle-switch input:checked + .slider { background-color: var(--accent); }

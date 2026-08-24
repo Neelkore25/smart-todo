@@ -1,29 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Smart-Todo — Task Manager</title>
-<meta name="description" content="A premium, glassmorphic task manager with priorities, categories, a calendar view, a Pomodoro timer, daily goals, and achievements." />
+<meta name="description" content="A premium task manager with priorities, categories, calendar view, Pomodoro timer, daily goals, achievements, and client-side E2E vault encryption." />
 <meta name="theme-color" id="themeColorMeta" content="#080B10" />
 <script>
-  /* Runs synchronously, before any CSS is applied, so the correct theme
-     is already set on <html> at first paint — no flash of wrong theme. */
+  /* Synchronous Theme Initialization — prevents FOUC (flash of wrong theme) */
   (function(){
     var ORDER = ['auto', 'light', 'dark'];
     try{
       var raw = localStorage.getItem('smarttodo.theme');
       if (raw === null) raw = localStorage.getItem('momentum.theme'); // legacy key
-      var mode = raw !== null ? JSON.parse(raw) : 'auto';
-      if (ORDER.indexOf(mode) === -1) mode = 'auto';
+      var mode = raw !== null ? JSON.parse(raw) : 'dark';
+      if (ORDER.indexOf(mode) === -1) mode = 'dark';
       document.documentElement.setAttribute('data-theme', mode);
 
       var isLight = mode === 'light' ||
         (mode === 'auto' && window.matchMedia('(prefers-color-scheme: light)').matches);
       var meta = document.getElementById('themeColorMeta');
-      if (meta) meta.setAttribute('content', isLight ? '#F8FAFC' : '#080B10');
+      if (meta) meta.setAttribute('content', isLight ? '#F5F7FA' : '#080B10');
     }catch(e){
-      document.documentElement.setAttribute('data-theme', 'auto');
+      document.documentElement.setAttribute('data-theme', 'dark');
     }
   })();
 </script>
@@ -57,11 +56,14 @@
     </div>
     <div class="stats-pills" id="statsPills"></div>
     <div class="topbar-actions">
+      <button id="authBadgeBtn" class="auth-badge-btn setup" type="button" title="E2E Encrypted Vault">
+        <i data-lucide="key"></i> <span>E2E Vault</span>
+      </button>
       <button id="settingsToggleBtn" class="icon-btn" title="Settings" aria-label="Open settings">
         <i data-lucide="settings"></i>
       </button>
-      <button id="themeToggle" class="icon-btn" title="Theme: auto" aria-label="Toggle theme">
-        <i data-lucide="sun-moon"></i>
+      <button id="themeToggle" class="icon-btn" title="Theme: dark" aria-label="Toggle theme">
+        <i data-lucide="sun"></i>
       </button>
     </div>
   </header>
@@ -222,6 +224,36 @@
     <span class="shortcuts-hint">Shortcuts: <b>n</b> new task · <b>/</b> search · <b>u</b> undo · <b>Esc</b> cancel</span>
   </footer>
 
+</div>
+
+<!-- ============ E2E AUTH MODAL ============ -->
+<div class="modal-backdrop" id="authModal" hidden>
+  <div class="auth-modal-card glass">
+    <button class="modal-close-btn" id="closeAuthModal" aria-label="Close modal"><i data-lucide="x"></i></button>
+    <div class="auth-modal-header">
+      <div class="auth-icon-badge"><i data-lucide="shield-check"></i></div>
+      <h2 id="authModalTitle">E2E Encrypted Vault</h2>
+      <p id="authModalSubtitle">Secure your tasks with AES-256-GCM zero-knowledge encryption.</p>
+    </div>
+    <form id="authForm">
+      <div class="form-group" id="usernameGroup">
+        <label for="authUsername">Vault Username / Name</label>
+        <input type="text" id="authUsername" placeholder="e.g. Neel" maxlength="30" />
+      </div>
+      <div class="form-group">
+        <label for="authPassword">Master Password</label>
+        <input type="password" id="authPassword" placeholder="Enter master password..." required minlength="4" />
+      </div>
+      <div class="auth-security-badge">
+        <i data-lucide="lock"></i> <span>AES-256-GCM · PBKDF2 (100k iterations) · Client-side only</span>
+      </div>
+      <div class="auth-modal-actions">
+        <button type="submit" class="btn-primary full-width" id="authSubmitBtn">Unlock Vault</button>
+        <button type="button" class="btn-text" id="toggleAuthMode">Create New Vault / Reset</button>
+        <button type="button" class="btn-danger-soft" id="lockVaultBtn" hidden>Lock Vault Now</button>
+      </div>
+    </form>
+  </div>
 </div>
 
 <!-- ============ SETTINGS MODAL ============ -->
